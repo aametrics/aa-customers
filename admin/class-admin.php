@@ -187,11 +187,13 @@ class AA_Customers_Admin extends AA_Customers_Base_Admin {
 						<?php esc_html_e( 'Add the following constants to wp-config.php:', 'aa-customers' ); ?>
 					</p>
 					<pre style="background: #f5f5f5; padding: 10px; overflow-x: auto;">
-define('AA_CUSTOMER_DB_HOST', 'localhost');
-define('AA_CUSTOMER_DB_USER', 'your_username');
-define('AA_CUSTOMER_DB_PASS', 'your_password');
-define('AA_CUSTOMER_DB_NAME', 'aa_customer');
-define('AA_CUSTOMER_DB_PREFIX', 'aac_');</pre>
+define('AA_CRM_DB_HOST', 'localhost');
+define('AA_CRM_DB_USER', 'your_username');
+define('AA_CRM_DB_PASSWORD', 'your_password');
+define('AA_CRM_DB_NAME', 'ukagp_crm');
+define('AA_CRM_DB_CHARSET', 'utf8mb4');
+define('AA_CRM_DB_PREFIX', 'crm_');
+define('AA_CRM_ENCRYPTION_KEY', 'your_encryption_key');</pre>
 				</div>
 			<?php else : ?>
 				<?php

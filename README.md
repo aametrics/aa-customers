@@ -38,11 +38,13 @@ Built on the Project Phoenix architecture.
 
 3. Add database configuration to `wp-config.php`:
    ```php
-   define('AA_CUSTOMER_DB_HOST', 'localhost');
-   define('AA_CUSTOMER_DB_USER', 'your_username');
-   define('AA_CUSTOMER_DB_PASS', 'your_password');
-   define('AA_CUSTOMER_DB_NAME', 'aa_customer');
-   define('AA_CUSTOMER_DB_PREFIX', 'aac_');
+   define('AA_CRM_DB_HOST', 'localhost');
+   define('AA_CRM_DB_USER', 'your_username');
+   define('AA_CRM_DB_PASSWORD', 'your_password');
+   define('AA_CRM_DB_NAME', 'ukagp_crm');
+   define('AA_CRM_DB_CHARSET', 'utf8mb4');
+   define('AA_CRM_DB_PREFIX', 'crm_');
+   define('AA_CRM_ENCRYPTION_KEY', 'your_encryption_key');
    ```
 
 4. Activate the plugin in WordPress admin

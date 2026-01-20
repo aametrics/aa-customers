@@ -2,7 +2,7 @@
 /**
  * Database Connection Handler for AA Customers
  *
- * Manages connection to separate AA Customers database.
+ * Manages connection to separate AA CRM database.
  * Uses separate credentials and database from WordPress core.
  *
  * @package AA_Customers
@@ -28,7 +28,7 @@ class AA_Customers_DB_Connection {
 	/**
 	 * Get database connection
 	 *
-	 * Returns wpdb instance connected to AA Customers database.
+	 * Returns wpdb instance connected to AA CRM database.
 	 * Falls back to WordPress database if separate DB not configured.
 	 *
 	 * @return wpdb Database connection.
@@ -38,7 +38,7 @@ class AA_Customers_DB_Connection {
 		if ( null !== self::$db ) {
 			global $wpdb;
 			$is_using_wp_db     = ( self::$db === $wpdb );
-			$constants_defined  = defined( 'AA_CUSTOMER_DB_NAME' ) && defined( 'AA_CUSTOMER_DB_USER' ) && defined( 'AA_CUSTOMER_DB_PASS' ) && defined( 'AA_CUSTOMER_DB_HOST' );
+			$constants_defined  = defined( 'AA_CRM_DB_NAME' ) && defined( 'AA_CRM_DB_USER' ) && defined( 'AA_CRM_DB_PASSWORD' ) && defined( 'AA_CRM_DB_HOST' );
 
 			// If using WP DB but constants ARE defined, reinitialize.
 			if ( $is_using_wp_db && $constants_defined ) {
@@ -46,8 +46,8 @@ class AA_Customers_DB_Connection {
 			}
 
 			// Check if prefix is wrong.
-			if ( null !== self::$db && defined( 'AA_CUSTOMER_DB_PREFIX' ) ) {
-				$expected_prefix = AA_CUSTOMER_DB_PREFIX;
+			if ( null !== self::$db && defined( 'AA_CRM_DB_PREFIX' ) ) {
+				$expected_prefix = AA_CRM_DB_PREFIX;
 				if ( self::$db->prefix !== $expected_prefix ) {
 					self::$db = null;
 				}
@@ -64,19 +64,19 @@ class AA_Customers_DB_Connection {
 	/**
 	 * Initialize database connection
 	 *
-	 * Creates new wpdb instance with AA Customers database credentials.
+	 * Creates new wpdb instance with AA CRM database credentials.
 	 * If separate database credentials not defined, falls back to WordPress DB.
 	 */
 	private static function initialize_connection() {
 		// Check if separate database credentials are defined.
-		if ( defined( 'AA_CUSTOMER_DB_NAME' ) && defined( 'AA_CUSTOMER_DB_USER' ) && defined( 'AA_CUSTOMER_DB_PASS' ) && defined( 'AA_CUSTOMER_DB_HOST' ) ) {
+		if ( defined( 'AA_CRM_DB_NAME' ) && defined( 'AA_CRM_DB_USER' ) && defined( 'AA_CRM_DB_PASSWORD' ) && defined( 'AA_CRM_DB_HOST' ) ) {
 
-			// Use separate AA Customers database.
+			// Use separate AA CRM database.
 			self::$db = new wpdb(
-				AA_CUSTOMER_DB_USER,
-				AA_CUSTOMER_DB_PASS,
-				AA_CUSTOMER_DB_NAME,
-				AA_CUSTOMER_DB_HOST
+				AA_CRM_DB_USER,
+				AA_CRM_DB_PASSWORD,
+				AA_CRM_DB_NAME,
+				AA_CRM_DB_HOST
 			);
 
 			// Verify connection.
@@ -88,14 +88,14 @@ class AA_Customers_DB_Connection {
 			}
 
 			// Set charset.
-			if ( defined( 'AA_CUSTOMER_DB_CHARSET' ) ) {
-				self::$db->set_charset( self::$db->dbh, AA_CUSTOMER_DB_CHARSET );
+			if ( defined( 'AA_CRM_DB_CHARSET' ) ) {
+				self::$db->set_charset( self::$db->dbh, AA_CRM_DB_CHARSET );
 			} else {
 				self::$db->set_charset( self::$db->dbh, 'utf8mb4' );
 			}
 
 			// Set table prefix.
-			self::$db->prefix = defined( 'AA_CUSTOMER_DB_PREFIX' ) ? AA_CUSTOMER_DB_PREFIX : 'aac_';
+			self::$db->prefix = defined( 'AA_CRM_DB_PREFIX' ) ? AA_CRM_DB_PREFIX : 'crm_';
 
 			error_log( sprintf(
 				'AA Customers: Connected to database: %s with prefix: %s',
@@ -139,8 +139,8 @@ class AA_Customers_DB_Connection {
 	 * @return string Database name.
 	 */
 	public static function get_database_name() {
-		if ( defined( 'AA_CUSTOMER_DB_NAME' ) ) {
-			return AA_CUSTOMER_DB_NAME;
+		if ( defined( 'AA_CRM_DB_NAME' ) ) {
+			return AA_CRM_DB_NAME;
 		}
 
 		global $wpdb;
@@ -163,6 +163,15 @@ class AA_Customers_DB_Connection {
 	 * @return bool True if using separate database.
 	 */
 	public static function is_separate_database() {
-		return defined( 'AA_CUSTOMER_DB_NAME' ) && defined( 'AA_CUSTOMER_DB_USER' );
+		return defined( 'AA_CRM_DB_NAME' ) && defined( 'AA_CRM_DB_USER' );
+	}
+
+	/**
+	 * Get encryption key
+	 *
+	 * @return string|null Encryption key or null if not set.
+	 */
+	public static function get_encryption_key() {
+		return defined( 'AA_CRM_ENCRYPTION_KEY' ) ? AA_CRM_ENCRYPTION_KEY : null;
 	}
 }

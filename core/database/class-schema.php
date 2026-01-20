@@ -36,7 +36,7 @@ class AA_Customers_Database {
 	 */
 	public static function maybe_create_tables() {
 		// Safety check: Do not proceed if constants aren't defined.
-		if ( ! defined( 'AA_CUSTOMER_DB_NAME' ) || ! defined( 'AA_CUSTOMER_DB_USER' ) ) {
+		if ( ! defined( 'AA_CRM_DB_NAME' ) || ! defined( 'AA_CRM_DB_USER' ) ) {
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 				error_log( 'AA Customers: DB constants not defined. Tables will not be created.' );
 			}
@@ -45,8 +45,8 @@ class AA_Customers_Database {
 
 		// Safety check: Ensure we're not in the WordPress database.
 		global $wpdb;
-		if ( AA_CUSTOMER_DB_NAME === $wpdb->dbname ) {
-			error_log( 'AA Customers: CRITICAL - AA_CUSTOMER_DB_NAME matches WordPress database! Tables will NOT be created.' );
+		if ( AA_CRM_DB_NAME === $wpdb->dbname ) {
+			error_log( 'AA Customers: CRITICAL - AA_CRM_DB_NAME matches WordPress database! Tables will NOT be created.' );
 			return;
 		}
 
@@ -56,10 +56,10 @@ class AA_Customers_Database {
 		$aac_wpdb = AA_Customers_DB_Connection::get_connection();
 
 		// Verify we're connected to the right database.
-		if ( $aac_wpdb->dbname !== AA_CUSTOMER_DB_NAME ) {
+		if ( $aac_wpdb->dbname !== AA_CRM_DB_NAME ) {
 			error_log( sprintf(
 				'AA Customers: Database mismatch! Expected: %s, Got: %s. ABORTING.',
-				AA_CUSTOMER_DB_NAME,
+				AA_CRM_DB_NAME,
 				$aac_wpdb->dbname
 			) );
 			return;
