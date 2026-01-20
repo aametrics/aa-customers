@@ -1,0 +1,124 @@
+/**
+ * AA Customers Admin Styles
+ *
+ * @package AA_Customers
+ */
+
+/* Dashboard Cards */
+.aa-customers-dashboard-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+	gap: 20px;
+	margin-top: 20px;
+}
+
+.aa-customers-card {
+	background: #fff;
+	padding: 20px;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.aa-customers-card h2 {
+	margin-top: 0;
+	font-size: 14px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.aa-customers-stat {
+	font-size: 36px;
+	font-weight: bold;
+	margin: 20px 0;
+	color: #2271b1;
+}
+
+/* Settings Tabs */
+.nav-tab-wrapper {
+	margin-bottom: 20px;
+}
+
+/* Form Tables */
+.form-table th {
+	width: 200px;
+}
+
+.form-table th h3 {
+	margin: 0;
+	padding-top: 10px;
+	border-top: 1px solid #c3c4c7;
+}
+
+.form-table input[type="text"],
+.form-table input[type="email"],
+.form-table input[type="password"] {
+	width: 100%;
+	max-width: 400px;
+}
+
+.form-table code {
+	background: #f0f0f1;
+	padding: 5px 10px;
+	display: inline-block;
+}
+
+/* Status Indicators */
+.status-active {
+	color: #00a32a;
+}
+
+.status-pending {
+	color: #dba617;
+}
+
+.status-expired {
+	color: #d63638;
+}
+
+.status-cancelled {
+	color: #787c82;
+}
+
+/* Member List Table */
+.wp-list-table .column-status {
+	width: 100px;
+}
+
+.wp-list-table .column-membership_type {
+	width: 150px;
+}
+
+.wp-list-table .column-expiry {
+	width: 100px;
+}
+
+/* Badges */
+.aa-customers-badge {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 3px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+.aa-customers-badge.active {
+	background: #d4edda;
+	color: #155724;
+}
+
+.aa-customers-badge.pending {
+	background: #fff3cd;
+	color: #856404;
+}
+
+.aa-customers-badge.expired {
+	background: #f8d7da;
+	color: #721c24;
+}
+
+.aa-customers-badge.cancelled {
+	background: #e2e3e5;
+	color: #383d41;
+}

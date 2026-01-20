@@ -1,0 +1,58 @@
+# WordPress
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.phpintel/
+.php_cs.cache
+
+# Logs
+*.log
+debug.log
+error_log
+
+# Cache
+*.cache
+cache/
+
+# Temporary
+*.tmp
+*.bak
+*.swp
+*~
+
+# Node (if using build tools)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Composer - vendor folder should NOT be committed
+/vendor/
+composer.lock
+*.zip
+
+# Environment
+.env
+.env.*
+
+# Testing
+/tests/
+phpunit.xml
+.phpunit.result.cache
+/coverage/
+
+# SQL files
+*.sql
+
+# Debug/temporary scripts
+debug-*.php
+fix-*.php
+test-*.php
+check-*.php
+
+# Do NOT include aa-planner in this plugin
+/aa-planner/
