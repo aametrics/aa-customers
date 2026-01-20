@@ -27,9 +27,19 @@ require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/database/class-db-connection.php';
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/database/class-schema.php';
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/database/class-migrator.php';
 
+// Include core repositories.
+require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/repositories/class-members-repository.php';
+require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/repositories/class-products-repository.php';
+require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/repositories/class-purchases-repository.php';
+require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/repositories/class-events-repository.php';
+require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/repositories/class-registrations-repository.php';
+
 // Include core services.
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/services/class-zap-storage.php';
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/services/class-email-service.php';
+require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/services/class-pdf-service.php';
+require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/services/class-stripe-service.php';
+require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/services/class-membership-service.php';
 
 // Include shared admin components.
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'admin/shared/class-base-admin.php';
@@ -55,6 +65,12 @@ class AA_Customers {
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'init' ) );
+		add_action( 'init', array( $this, 'setup_cron' ) );
+
+		// Cron handlers.
+		add_action( 'aa_customers_check_expirations', array( $this, 'cron_check_expirations' ) );
+		add_action( 'aa_customers_send_reminders', array( $this, 'cron_send_reminders' ) );
+
 		register_activation_hook( __FILE__, array( $this, 'activate' ) );
 		register_deactivation_hook( __FILE__, array( $this, 'deactivate' ) );
 	}
@@ -120,6 +136,25 @@ class AA_Customers {
 	}
 
 	/**
+	 * Setup cron jobs
+	 *
+	 * Schedules daily membership checks.
+	 *
+	 * @return void
+	 */
+	public function setup_cron() {
+		// Schedule daily expiration check.
+		if ( ! wp_next_scheduled( 'aa_customers_check_expirations' ) ) {
+			wp_schedule_event( strtotime( 'tomorrow 6:00am' ), 'daily', 'aa_customers_check_expirations' );
+		}
+
+		// Schedule daily renewal reminders.
+		if ( ! wp_next_scheduled( 'aa_customers_send_reminders' ) ) {
+			wp_schedule_event( strtotime( 'tomorrow 8:00am' ), 'daily', 'aa_customers_send_reminders' );
+		}
+	}
+
+	/**
 	 * Register custom member role
 	 *
 	 * Creates a 'member' role with minimal capabilities.
@@ -163,3 +198,62 @@ add_action( 'after_setup_theme', function() {
 		show_admin_bar( false );
 	}
 } );
+
+/**
+ * Cron: Check expirations
+ */
+add_action( 'aa_customers_check_expirations', function() {
+	if ( ! AA_Customers_DB_Connection::is_separate_database() ) {
+		return;
+	}
+	$membership_service = new AA_Customers_Membership_Service();
+	$count = $membership_service->process_expired_memberships();
+	error_log( 'AA Customers Cron: Processed ' . $count . ' expired memberships.' );
+} );
+
+/**
+ * Cron: Send renewal reminders
+ */
+add_action( 'aa_customers_send_reminders', function() {
+	if ( ! AA_Customers_DB_Connection::is_separate_database() ) {
+		return;
+	}
+	$membership_service = new AA_Customers_Membership_Service();
+	$count = $membership_service->send_renewal_reminders( 30 );
+	error_log( 'AA Customers Cron: Sent ' . $count . ' renewal reminders.' );
+} );
+
+/**
+ * Register REST API routes for Stripe webhooks
+ */
+add_action( 'rest_api_init', function() {
+	register_rest_route( 'aa-customers/v1', '/stripe-webhook', array(
+		'methods'             => 'POST',
+		'callback'            => 'aa_customers_handle_stripe_webhook',
+		'permission_callback' => '__return_true',
+	) );
+} );
+
+/**
+ * Handle Stripe webhook
+ *
+ * @param WP_REST_Request $request Request object.
+ * @return WP_REST_Response Response.
+ */
+function aa_customers_handle_stripe_webhook( $request ) {
+	$payload    = $request->get_body();
+	$sig_header = $request->get_header( 'stripe-signature' );
+
+	$stripe_service = new AA_Customers_Stripe_Service();
+
+	$event = $stripe_service->verify_webhook( $payload, $sig_header );
+
+	if ( is_wp_error( $event ) ) {
+		error_log( 'AA Customers Stripe Webhook: ' . $event->get_error_message() );
+		return new WP_REST_Response( array( 'error' => $event->get_error_message() ), 400 );
+	}
+
+	$result = $stripe_service->handle_webhook_event( $event );
+
+	return new WP_REST_Response( array( 'received' => true ), 200 );
+}
