@@ -45,6 +45,10 @@ require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/services/class-membership-service.p
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'admin/shared/class-base-admin.php';
 
 // Include admin modules.
+require_once AA_CUSTOMERS_PLUGIN_DIR . 'admin/members/class-members-admin.php';
+require_once AA_CUSTOMERS_PLUGIN_DIR . 'admin/products/class-products-admin.php';
+require_once AA_CUSTOMERS_PLUGIN_DIR . 'admin/events/class-events-admin.php';
+require_once AA_CUSTOMERS_PLUGIN_DIR . 'admin/purchases/class-purchases-admin.php';
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'admin/class-admin.php';
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'admin/settings/class-settings.php';
 

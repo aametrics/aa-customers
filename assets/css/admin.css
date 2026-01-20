@@ -122,3 +122,126 @@
 	background: #e2e3e5;
 	color: #383d41;
 }
+
+/* Badge variants with badge- prefix */
+.badge-active {
+	background: #d4edda;
+	color: #155724;
+}
+
+.badge-pending {
+	background: #fff3cd;
+	color: #856404;
+}
+
+.badge-expired {
+	background: #f8d7da;
+	color: #721c24;
+}
+
+.badge-cancelled {
+	background: #e2e3e5;
+	color: #383d41;
+}
+
+.badge-warning {
+	background: #ffc107;
+	color: #000;
+}
+
+.badge-none {
+	background: #f0f0f1;
+	color: #50575e;
+}
+
+/* Card warning state */
+.aa-customers-card.card-warning {
+	border-left: 4px solid #dba617;
+}
+
+/* Upcoming Events */
+.aa-customers-upcoming-events {
+	margin-top: 30px;
+}
+
+.aa-customers-upcoming-events h2 {
+	font-size: 18px;
+	margin-bottom: 15px;
+}
+
+/* List Table Columns */
+.wp-list-table .column-id { width: 60px; }
+.wp-list-table .column-date { width: 140px; }
+.wp-list-table .column-price,
+.wp-list-table .column-amount,
+.wp-list-table .column-donation,
+.wp-list-table .column-total { width: 100px; }
+.wp-list-table .column-type { width: 100px; }
+.wp-list-table .column-recurring { width: 100px; }
+.wp-list-table .column-directory { width: 80px; text-align: center; }
+.wp-list-table .column-capacity { width: 100px; }
+.wp-list-table .column-registrations { width: 120px; }
+.wp-list-table .column-member-price { width: 110px; }
+
+/* Stats Row */
+.aa-customers-stats-row {
+	display: flex;
+	gap: 20px;
+	margin-bottom: 20px;
+}
+
+.aa-customers-stat-box {
+	background: #fff;
+	border: 1px solid #ccd0d4;
+	padding: 20px;
+	min-width: 150px;
+	text-align: center;
+}
+
+.aa-customers-stat-box .stat-number {
+	display: block;
+	font-size: 24px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.aa-customers-stat-box .stat-label {
+	display: block;
+	font-size: 12px;
+	color: #646970;
+	margin-top: 5px;
+}
+
+/* Search Box */
+.search-box {
+	float: right;
+	margin-bottom: 10px;
+}
+
+/* Member/Purchase View Grid */
+.aa-customers-member-view,
+.aa-customers-purchase-view {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+	gap: 20px;
+	margin-top: 20px;
+}
+
+.aa-customers-member-view .aa-customers-card h2,
+.aa-customers-purchase-view .aa-customers-card h2 {
+	margin-top: 0;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #eee;
+}
+
+.aa-customers-member-view table th,
+.aa-customers-purchase-view table th {
+	width: 150px;
+	text-align: left;
+	padding: 8px;
+}
+
+.aa-customers-member-view table td,
+.aa-customers-purchase-view table td {
+	padding: 8px;
+}

@@ -19,11 +19,45 @@ if ( ! defined( 'ABSPATH' ) ) {
 class AA_Customers_Admin extends AA_Customers_Base_Admin {
 
 	/**
+	 * Members admin
+	 *
+	 * @var AA_Customers_Members_Admin
+	 */
+	private $members_admin;
+
+	/**
+	 * Products admin
+	 *
+	 * @var AA_Customers_Products_Admin
+	 */
+	private $products_admin;
+
+	/**
+	 * Events admin
+	 *
+	 * @var AA_Customers_Events_Admin
+	 */
+	private $events_admin;
+
+	/**
+	 * Purchases admin
+	 *
+	 * @var AA_Customers_Purchases_Admin
+	 */
+	private $purchases_admin;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+
+		// Initialize sub-admin classes.
+		$this->members_admin   = new AA_Customers_Members_Admin();
+		$this->products_admin  = new AA_Customers_Products_Admin();
+		$this->events_admin    = new AA_Customers_Events_Admin();
+		$this->purchases_admin = new AA_Customers_Purchases_Admin();
 	}
 
 	/**
@@ -160,40 +194,96 @@ define('AA_CUSTOMER_DB_NAME', 'aa_customer');
 define('AA_CUSTOMER_DB_PREFIX', 'aac_');</pre>
 				</div>
 			<?php else : ?>
-				<div class="notice notice-success">
-					<p><?php esc_html_e( 'Database connected successfully.', 'aa-customers' ); ?></p>
-				</div>
+				<?php
+				// Get real statistics.
+				$membership_service = new AA_Customers_Membership_Service();
+				$stats = $membership_service->get_statistics();
 
-				<div class="aa-customers-dashboard-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+				$purchases_repo = new AA_Customers_Purchases_Repository();
+				$monthly_revenue = $purchases_repo->get_monthly_revenue();
 
-					<div class="aa-customers-card" style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 4px;">
-						<h2 style="margin-top: 0;"><?php esc_html_e( 'Members', 'aa-customers' ); ?></h2>
-						<p class="aa-customers-stat" style="font-size: 36px; font-weight: bold; margin: 20px 0;">—</p>
+				$events_repo = new AA_Customers_Events_Repository();
+				$upcoming_events = $events_repo->get_upcoming_with_products( 5 );
+				?>
+
+				<div class="aa-customers-dashboard-grid">
+
+					<div class="aa-customers-card">
+						<h2><?php esc_html_e( 'Members', 'aa-customers' ); ?></h2>
+						<p class="aa-customers-stat"><?php echo esc_html( $stats['total'] ); ?></p>
 						<p><?php esc_html_e( 'Total members', 'aa-customers' ); ?></p>
 						<a href="<?php echo esc_url( admin_url( 'admin.php?page=aa-customers-members' ) ); ?>" class="button">
 							<?php esc_html_e( 'View Members', 'aa-customers' ); ?>
 						</a>
 					</div>
 
-					<div class="aa-customers-card" style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 4px;">
-						<h2 style="margin-top: 0;"><?php esc_html_e( 'Active Memberships', 'aa-customers' ); ?></h2>
-						<p class="aa-customers-stat" style="font-size: 36px; font-weight: bold; margin: 20px 0;">—</p>
+					<div class="aa-customers-card">
+						<h2><?php esc_html_e( 'Active Memberships', 'aa-customers' ); ?></h2>
+						<p class="aa-customers-stat"><?php echo esc_html( $stats['active'] ); ?></p>
 						<p><?php esc_html_e( 'Currently active', 'aa-customers' ); ?></p>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=aa-customers-members&status=active' ) ); ?>" class="button">
+							<?php esc_html_e( 'View Active', 'aa-customers' ); ?>
+						</a>
 					</div>
 
-					<div class="aa-customers-card" style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 4px;">
-						<h2 style="margin-top: 0;"><?php esc_html_e( 'Expiring Soon', 'aa-customers' ); ?></h2>
-						<p class="aa-customers-stat" style="font-size: 36px; font-weight: bold; margin: 20px 0;">—</p>
+					<div class="aa-customers-card <?php echo $stats['expiring_30'] > 0 ? 'card-warning' : ''; ?>">
+						<h2><?php esc_html_e( 'Expiring Soon', 'aa-customers' ); ?></h2>
+						<p class="aa-customers-stat"><?php echo esc_html( $stats['expiring_30'] ); ?></p>
 						<p><?php esc_html_e( 'Next 30 days', 'aa-customers' ); ?></p>
+						<?php if ( $stats['expiring_7'] > 0 ) : ?>
+							<p class="description"><?php echo esc_html( $stats['expiring_7'] ); ?> expiring within 7 days</p>
+						<?php endif; ?>
 					</div>
 
-					<div class="aa-customers-card" style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 4px;">
-						<h2 style="margin-top: 0;"><?php esc_html_e( 'Revenue', 'aa-customers' ); ?></h2>
-						<p class="aa-customers-stat" style="font-size: 36px; font-weight: bold; margin: 20px 0;">£—</p>
-						<p><?php esc_html_e( 'This month', 'aa-customers' ); ?></p>
+					<div class="aa-customers-card">
+						<h2><?php esc_html_e( 'Revenue', 'aa-customers' ); ?></h2>
+						<p class="aa-customers-stat">£<?php echo esc_html( number_format( $monthly_revenue, 0 ) ); ?></p>
+						<p><?php echo esc_html( date( 'F Y' ) ); ?></p>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=aa-customers-purchases' ) ); ?>" class="button">
+							<?php esc_html_e( 'View Purchases', 'aa-customers' ); ?>
+						</a>
 					</div>
 
 				</div>
+
+				<?php if ( ! empty( $upcoming_events ) ) : ?>
+					<div class="aa-customers-upcoming-events">
+						<h2><?php esc_html_e( 'Upcoming Events', 'aa-customers' ); ?></h2>
+						<table class="wp-list-table widefat fixed striped">
+							<thead>
+								<tr>
+									<th>Event</th>
+									<th>Date</th>
+									<th>Registrations</th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php foreach ( $upcoming_events as $event ) : ?>
+									<?php $reg_count = $events_repo->get_registration_count( $event->id ); ?>
+									<tr>
+										<td>
+											<a href="<?php echo esc_url( admin_url( 'admin.php?page=aa-customers-events&action=edit&id=' . $event->id ) ); ?>">
+												<?php echo esc_html( $event->name ); ?>
+											</a>
+										</td>
+										<td><?php echo esc_html( date( 'j M Y', strtotime( $event->event_date ) ) ); ?></td>
+										<td>
+											<?php echo esc_html( $reg_count ); ?>
+											<?php if ( $event->capacity ) : ?>
+												/ <?php echo esc_html( $event->capacity ); ?>
+											<?php endif; ?>
+										</td>
+									</tr>
+								<?php endforeach; ?>
+							</tbody>
+						</table>
+						<p>
+							<a href="<?php echo esc_url( admin_url( 'admin.php?page=aa-customers-events' ) ); ?>" class="button">
+								<?php esc_html_e( 'View All Events', 'aa-customers' ); ?>
+							</a>
+						</p>
+					</div>
+				<?php endif; ?>
 
 				<div style="margin-top: 30px;">
 					<h2><?php esc_html_e( 'Quick Actions', 'aa-customers' ); ?></h2>
@@ -217,7 +307,7 @@ define('AA_CUSTOMER_DB_PREFIX', 'aac_');</pre>
 	}
 
 	/**
-	 * Render members page (placeholder)
+	 * Render members page
 	 *
 	 * @return void
 	 */
@@ -226,16 +316,11 @@ define('AA_CUSTOMER_DB_PREFIX', 'aac_');</pre>
 			wp_die( __( 'Unauthorized access', 'aa-customers' ) );
 		}
 
-		?>
-		<div class="wrap">
-			<h1><?php esc_html_e( 'Members', 'aa-customers' ); ?></h1>
-			<p><?php esc_html_e( 'Member management coming soon.', 'aa-customers' ); ?></p>
-		</div>
-		<?php
+		$this->members_admin->render();
 	}
 
 	/**
-	 * Render products page (placeholder)
+	 * Render products page
 	 *
 	 * @return void
 	 */
@@ -244,16 +329,11 @@ define('AA_CUSTOMER_DB_PREFIX', 'aac_');</pre>
 			wp_die( __( 'Unauthorized access', 'aa-customers' ) );
 		}
 
-		?>
-		<div class="wrap">
-			<h1><?php esc_html_e( 'Products', 'aa-customers' ); ?></h1>
-			<p><?php esc_html_e( 'Product management coming soon.', 'aa-customers' ); ?></p>
-		</div>
-		<?php
+		$this->products_admin->render();
 	}
 
 	/**
-	 * Render events page (placeholder)
+	 * Render events page
 	 *
 	 * @return void
 	 */
@@ -262,16 +342,11 @@ define('AA_CUSTOMER_DB_PREFIX', 'aac_');</pre>
 			wp_die( __( 'Unauthorized access', 'aa-customers' ) );
 		}
 
-		?>
-		<div class="wrap">
-			<h1><?php esc_html_e( 'Events', 'aa-customers' ); ?></h1>
-			<p><?php esc_html_e( 'Event management coming soon.', 'aa-customers' ); ?></p>
-		</div>
-		<?php
+		$this->events_admin->render();
 	}
 
 	/**
-	 * Render purchases page (placeholder)
+	 * Render purchases page
 	 *
 	 * @return void
 	 */
@@ -280,11 +355,6 @@ define('AA_CUSTOMER_DB_PREFIX', 'aac_');</pre>
 			wp_die( __( 'Unauthorized access', 'aa-customers' ) );
 		}
 
-		?>
-		<div class="wrap">
-			<h1><?php esc_html_e( 'Purchases', 'aa-customers' ); ?></h1>
-			<p><?php esc_html_e( 'Purchase history coming soon.', 'aa-customers' ); ?></p>
-		</div>
-		<?php
+		$this->purchases_admin->render();
 	}
 }
