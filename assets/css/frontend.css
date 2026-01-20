@@ -1,0 +1,607 @@
+/**
+ * AA Customers Frontend Styles
+ *
+ * @package AA_Customers
+ */
+
+/* Base Styles */
+.aa-button {
+	display: inline-block;
+	padding: 12px 24px;
+	background: #2271b1;
+	color: #fff;
+	text-decoration: none;
+	border-radius: 4px;
+	font-weight: 500;
+	border: none;
+	cursor: pointer;
+	transition: background 0.2s;
+}
+
+.aa-button:hover {
+	background: #135e96;
+	color: #fff;
+}
+
+.aa-button-secondary {
+	background: #f0f0f1;
+	color: #1d2327;
+}
+
+.aa-button-secondary:hover {
+	background: #dcdcde;
+	color: #1d2327;
+}
+
+.aa-button-large {
+	padding: 16px 32px;
+	font-size: 1.1em;
+}
+
+/* Status Badges */
+.aa-status-badge {
+	display: inline-block;
+	padding: 4px 10px;
+	border-radius: 3px;
+	font-size: 12px;
+	font-weight: 500;
+	text-transform: capitalize;
+}
+
+.aa-status-succeeded,
+.aa-status-active,
+.aa-status-confirmed {
+	background: #d4edda;
+	color: #155724;
+}
+
+.aa-status-pending,
+.aa-status-waitlist {
+	background: #fff3cd;
+	color: #856404;
+}
+
+.aa-status-failed,
+.aa-status-expired {
+	background: #f8d7da;
+	color: #721c24;
+}
+
+.aa-status-cancelled,
+.aa-status-refunded {
+	background: #e2e3e5;
+	color: #383d41;
+}
+
+/* Member Dashboard */
+.aa-member-dashboard {
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+.aa-dashboard-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: 20px;
+	margin: 30px 0;
+}
+
+.aa-dashboard-card {
+	background: #fff;
+	padding: 25px;
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+}
+
+.aa-dashboard-card h3 {
+	margin-top: 0;
+	padding-bottom: 15px;
+	border-bottom: 1px solid #eee;
+}
+
+.aa-membership-status {
+	padding: 20px;
+	border-radius: 6px;
+	margin: 15px 0;
+}
+
+.aa-membership-status.status-active {
+	background: #d4edda;
+}
+
+.aa-membership-status.status-expired {
+	background: #f8d7da;
+}
+
+.aa-membership-status.status-none {
+	background: #f0f0f1;
+}
+
+.status-badge {
+	display: inline-block;
+	padding: 4px 12px;
+	background: #155724;
+	color: #fff;
+	border-radius: 20px;
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+	margin-bottom: 10px;
+}
+
+.status-expired .status-badge {
+	background: #721c24;
+}
+
+.aa-warning {
+	color: #856404;
+	background: #fff3cd;
+	padding: 10px;
+	border-radius: 4px;
+	margin-top: 15px;
+}
+
+.aa-dashboard-section {
+	margin-top: 40px;
+}
+
+.aa-dashboard-section h3 {
+	margin-bottom: 20px;
+}
+
+/* Tables */
+.aa-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.aa-table th,
+.aa-table td {
+	padding: 12px;
+	text-align: left;
+	border-bottom: 1px solid #e0e0e0;
+}
+
+.aa-table th {
+	background: #f8f9fa;
+	font-weight: 600;
+}
+
+.aa-table tbody tr:hover {
+	background: #f8f9fa;
+}
+
+/* Practitioner Directory */
+.aa-practitioner-directory {
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+.aa-directory-search {
+	margin-bottom: 30px;
+}
+
+.aa-search-row {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.aa-search-row input {
+	flex: 1;
+	min-width: 150px;
+	padding: 10px 15px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+}
+
+.aa-directory-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+	gap: 20px;
+}
+
+.aa-practitioner-card {
+	background: #fff;
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.aa-practitioner-photo img {
+	width: 100%;
+	height: 200px;
+	object-fit: cover;
+}
+
+.aa-practitioner-info {
+	padding: 20px;
+}
+
+.aa-practitioner-info h3 {
+	margin-top: 0;
+	margin-bottom: 10px;
+}
+
+.aa-practitioner-info .aa-location {
+	color: #666;
+	font-size: 14px;
+}
+
+.aa-specialty-tag {
+	display: inline-block;
+	padding: 3px 8px;
+	background: #e9ecef;
+	border-radius: 3px;
+	font-size: 12px;
+	margin: 2px;
+}
+
+.aa-practitioner-info .aa-bio {
+	color: #444;
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.aa-website-link {
+	display: inline-block;
+	margin-top: 15px;
+	color: #2271b1;
+	text-decoration: none;
+}
+
+.aa-website-link:hover {
+	text-decoration: underline;
+}
+
+.aa-directory-count {
+	margin-top: 20px;
+	color: #666;
+	font-size: 14px;
+}
+
+/* Join Page */
+.aa-join-page {
+	max-width: 1000px;
+	margin: 0 auto;
+}
+
+.aa-membership-options {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 25px;
+	margin: 30px 0;
+}
+
+.aa-membership-card {
+	background: #fff;
+	border: 2px solid #e0e0e0;
+	border-radius: 10px;
+	padding: 30px;
+	text-align: center;
+	transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.aa-membership-card:hover {
+	border-color: #2271b1;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.aa-membership-card h3 {
+	margin-top: 0;
+	font-size: 1.4em;
+}
+
+.aa-membership-card .aa-price {
+	margin: 20px 0;
+}
+
+.aa-membership-card .aa-amount {
+	font-size: 2.5em;
+	font-weight: 700;
+	color: #1d2327;
+}
+
+.aa-membership-card .aa-period {
+	color: #666;
+}
+
+.aa-membership-card .aa-description {
+	color: #555;
+	font-size: 14px;
+	line-height: 1.6;
+	margin-bottom: 25px;
+}
+
+.aa-login-notice {
+	text-align: center;
+	padding: 20px;
+	background: #f0f0f1;
+	border-radius: 6px;
+	margin-top: 30px;
+}
+
+/* Events List */
+.aa-events-list {
+	max-width: 1000px;
+	margin: 0 auto;
+}
+
+.aa-events-grid {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.aa-event-card {
+	display: flex;
+	background: #fff;
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.aa-event-date {
+	flex-shrink: 0;
+	width: 100px;
+	background: #2271b1;
+	color: #fff;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+}
+
+.aa-event-date .aa-day {
+	font-size: 2em;
+	font-weight: 700;
+	line-height: 1;
+}
+
+.aa-event-date .aa-month {
+	font-size: 0.9em;
+	text-transform: uppercase;
+	margin-top: 5px;
+}
+
+.aa-event-date .aa-year {
+	font-size: 0.8em;
+	opacity: 0.8;
+}
+
+.aa-event-details {
+	flex: 1;
+	padding: 20px;
+}
+
+.aa-event-details h3 {
+	margin-top: 0;
+	margin-bottom: 10px;
+}
+
+.aa-event-details .aa-time,
+.aa-event-details .aa-location {
+	font-size: 14px;
+	color: #666;
+	margin: 5px 0;
+}
+
+.aa-event-details .aa-description {
+	color: #444;
+	font-size: 14px;
+	margin: 15px 0;
+}
+
+.aa-event-footer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 20px;
+	padding-top: 15px;
+	border-top: 1px solid #eee;
+}
+
+.aa-event-footer .aa-price {
+	font-size: 1.2em;
+	font-weight: 600;
+}
+
+.aa-member-discount {
+	font-size: 12px;
+	color: #155724;
+	font-weight: normal;
+}
+
+.aa-sold-out,
+.aa-closed {
+	padding: 10px 20px;
+	background: #f8d7da;
+	color: #721c24;
+	border-radius: 4px;
+	font-weight: 500;
+}
+
+.aa-low-spots {
+	color: #856404;
+	font-size: 13px;
+}
+
+/* Single Event */
+.aa-single-event {
+	max-width: 800px;
+	margin: 0 auto;
+}
+
+.aa-event-meta {
+	background: #f8f9fa;
+	padding: 20px;
+	border-radius: 6px;
+	margin: 20px 0;
+}
+
+.aa-event-meta p {
+	margin: 8px 0;
+}
+
+.aa-event-description,
+.aa-additional-info {
+	margin: 25px 0;
+	line-height: 1.7;
+}
+
+.aa-event-registration {
+	background: #fff;
+	border: 2px solid #2271b1;
+	border-radius: 8px;
+	padding: 25px;
+	margin-top: 30px;
+	text-align: center;
+}
+
+.aa-price-box {
+	margin-bottom: 20px;
+}
+
+.aa-price-box .aa-label {
+	color: #666;
+}
+
+.aa-price-box .aa-price {
+	font-size: 2em;
+	font-weight: 700;
+	display: block;
+	margin: 10px 0;
+}
+
+.aa-non-member-note {
+	font-size: 13px;
+	color: #666;
+}
+
+.aa-sold-out-notice,
+.aa-closed-notice {
+	padding: 15px;
+	background: #f8d7da;
+	color: #721c24;
+	border-radius: 4px;
+}
+
+/* Checkout Success */
+.aa-checkout-success {
+	max-width: 600px;
+	margin: 40px auto;
+	text-align: center;
+	padding: 40px;
+}
+
+.aa-success-icon {
+	font-size: 60px;
+	color: #28a745;
+	margin-bottom: 20px;
+}
+
+.aa-success-icon .dashicons {
+	font-size: 80px;
+	width: 80px;
+	height: 80px;
+}
+
+.aa-checkout-success h2 {
+	margin-bottom: 15px;
+}
+
+.aa-success-actions {
+	margin-top: 30px;
+	display: flex;
+	gap: 15px;
+	justify-content: center;
+	flex-wrap: wrap;
+}
+
+/* Notices */
+.aa-notice {
+	padding: 15px 20px;
+	border-radius: 6px;
+	margin-bottom: 20px;
+}
+
+.aa-notice-info {
+	background: #cce5ff;
+	color: #004085;
+	border: 1px solid #b8daff;
+}
+
+.aa-notice-success {
+	background: #d4edda;
+	color: #155724;
+	border: 1px solid #c3e6cb;
+}
+
+.aa-notice-warning {
+	background: #fff3cd;
+	color: #856404;
+	border: 1px solid #ffeeba;
+}
+
+.aa-notice-error {
+	background: #f8d7da;
+	color: #721c24;
+	border: 1px solid #f5c6cb;
+}
+
+/* Login Required / Not Member */
+.aa-login-required,
+.aa-not-member {
+	max-width: 500px;
+	margin: 40px auto;
+	text-align: center;
+	padding: 40px;
+	background: #f8f9fa;
+	border-radius: 10px;
+}
+
+/* No Results */
+.aa-no-results,
+.aa-no-events {
+	text-align: center;
+	padding: 40px;
+	color: #666;
+	background: #f8f9fa;
+	border-radius: 6px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+	.aa-event-card {
+		flex-direction: column;
+	}
+
+	.aa-event-date {
+		width: 100%;
+		flex-direction: row;
+		gap: 10px;
+		padding: 15px;
+	}
+
+	.aa-event-date .aa-day {
+		font-size: 1.5em;
+	}
+
+	.aa-search-row {
+		flex-direction: column;
+	}
+
+	.aa-search-row input {
+		width: 100%;
+	}
+
+	.aa-dashboard-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.aa-event-footer {
+		flex-direction: column;
+		gap: 15px;
+	}
+}

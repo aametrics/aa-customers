@@ -52,6 +52,10 @@ require_once AA_CUSTOMERS_PLUGIN_DIR . 'admin/purchases/class-purchases-admin.ph
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'admin/class-admin.php';
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'admin/settings/class-settings.php';
 
+// Include frontend modules.
+require_once AA_CUSTOMERS_PLUGIN_DIR . 'frontend/class-shortcodes.php';
+require_once AA_CUSTOMERS_PLUGIN_DIR . 'frontend/class-ajax-handler.php';
+
 /**
  * Main Plugin Class
  *
@@ -99,6 +103,10 @@ class AA_Customers {
 			new AA_Customers_Admin();
 			new AA_Customers_Settings();
 		}
+
+		// Initialize frontend components.
+		new AA_Customers_Shortcodes();
+		new AA_Customers_Ajax_Handler();
 
 		// Register custom member role if it doesn't exist.
 		$this->register_member_role();
