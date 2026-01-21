@@ -92,6 +92,31 @@ abstract class AA_Customers_Base_Admin {
 	}
 
 	/**
+	 * Render admin notices with default messages
+	 *
+	 * Convenience method that displays common admin notices.
+	 *
+	 * @return void
+	 */
+	protected function render_admin_notices() {
+		$success_messages = array(
+			'saved'   => __( 'Successfully saved.', 'aa-customers' ),
+			'created' => __( 'Successfully created.', 'aa-customers' ),
+			'updated' => __( 'Successfully updated.', 'aa-customers' ),
+			'deleted' => __( 'Successfully deleted.', 'aa-customers' ),
+		);
+
+		$error_messages = array(
+			'save_failed'   => __( 'Failed to save. Please try again.', 'aa-customers' ),
+			'delete_failed' => __( 'Failed to delete. Please try again.', 'aa-customers' ),
+			'not_found'     => __( 'Item not found.', 'aa-customers' ),
+			'invalid_nonce' => __( 'Security check failed. Please try again.', 'aa-customers' ),
+		);
+
+		$this->display_admin_notices( $success_messages, $error_messages );
+	}
+
+	/**
 	 * Redirect to admin page with message
 	 *
 	 * @param string $page The admin page slug.

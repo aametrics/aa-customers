@@ -194,9 +194,20 @@ new AA_Customers();
  * Redirect members away from wp-admin
  *
  * Members should use the frontend dashboard, not wp-admin.
+ * Only redirect users who ONLY have the member role (not admins).
  */
 add_action( 'admin_init', function() {
-	if ( current_user_can( 'member' ) && ! wp_doing_ajax() ) {
+	// Don't redirect if doing AJAX or if user is not logged in.
+	if ( wp_doing_ajax() || ! is_user_logged_in() ) {
+		return;
+	}
+
+	$user = wp_get_current_user();
+
+	// Only redirect if user has ONLY the 'member' role and no admin capabilities.
+	if ( in_array( 'member', (array) $user->roles, true ) 
+		&& ! current_user_can( 'manage_options' ) 
+		&& ! current_user_can( 'edit_posts' ) ) {
 		wp_redirect( home_url( '/member-dashboard' ) );
 		exit;
 	}
