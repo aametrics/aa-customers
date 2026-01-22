@@ -402,11 +402,42 @@ class AA_Customers_Stripe_Service {
 		// Create purchase record.
 		$purchases_repo = new AA_Customers_Purchases_Repository();
 		$products_repo  = new AA_Customers_Products_Repository();
+		$members_repo   = new AA_Customers_Members_Repository();
 		$product        = $products_repo->get_by_id( $product_id );
+		$member         = $members_repo->get_by_id( $member_id );
 
 		if ( ! $product ) {
 			error_log( 'AA Customers Stripe: Product not found - ' . $product_id );
 			return false;
+		}
+
+		// Retrieve full customer details from Stripe.
+		$customer_data = $this->get_customer_details_from_session( $session );
+
+		// Update member with customer details from Stripe.
+		if ( $member && ! empty( $customer_data ) ) {
+			$update_data = array();
+
+			if ( ! empty( $customer_data['phone'] ) && empty( $member->phone ) ) {
+				$update_data['phone'] = $customer_data['phone'];
+			}
+			if ( ! empty( $customer_data['address'] ) ) {
+				if ( empty( $member->address_line1 ) ) {
+					$update_data['address_line1'] = $customer_data['address']['line1'] ?? '';
+					$update_data['address_line2'] = $customer_data['address']['line2'] ?? '';
+					$update_data['city']          = $customer_data['address']['city'] ?? '';
+					$update_data['postcode']      = $customer_data['address']['postal_code'] ?? '';
+					$update_data['country']       = $customer_data['address']['country'] ?? '';
+				}
+			}
+			if ( ! empty( $customer_data['stripe_customer_id'] ) && empty( $member->stripe_customer_id ) ) {
+				$update_data['stripe_customer_id'] = $customer_data['stripe_customer_id'];
+			}
+
+			if ( ! empty( $update_data ) ) {
+				$members_repo->update( $member_id, $update_data );
+				error_log( 'AA Customers Stripe: Updated member with customer details.' );
+			}
 		}
 
 		$purchase_id = $purchases_repo->create( array(
@@ -447,8 +478,128 @@ class AA_Customers_Stripe_Service {
 			}
 		}
 
+		// Sync to Xero.
+		$this->sync_to_xero( $session, $member, $product, $customer_data, $donation );
+
 		error_log( 'AA Customers Stripe: Checkout completed - Purchase ID ' . $purchase_id );
 		return true;
+	}
+
+	/**
+	 * Get customer details from Stripe session
+	 *
+	 * @param object $session Stripe session.
+	 * @return array Customer data.
+	 */
+	private function get_customer_details_from_session( $session ) {
+		$data = array();
+
+		try {
+			// Get customer ID.
+			$customer_id = $session->customer ?? null;
+
+			if ( $customer_id ) {
+				$data['stripe_customer_id'] = $customer_id;
+
+				// Retrieve full customer object from Stripe.
+				$customer = \Stripe\Customer::retrieve( $customer_id );
+
+				if ( $customer ) {
+					$data['email'] = $customer->email ?? '';
+					$data['name']  = $customer->name ?? '';
+					$data['phone'] = $customer->phone ?? '';
+
+					// Get address from customer.
+					if ( isset( $customer->address ) && $customer->address ) {
+						$data['address'] = array(
+							'line1'       => $customer->address->line1 ?? '',
+							'line2'       => $customer->address->line2 ?? '',
+							'city'        => $customer->address->city ?? '',
+							'state'       => $customer->address->state ?? '',
+							'postal_code' => $customer->address->postal_code ?? '',
+							'country'     => $customer->address->country ?? '',
+						);
+					}
+				}
+			}
+
+			// Also check customer_details from session (populated during checkout).
+			if ( isset( $session->customer_details ) ) {
+				$details = $session->customer_details;
+
+				if ( empty( $data['email'] ) && isset( $details->email ) ) {
+					$data['email'] = $details->email;
+				}
+				if ( empty( $data['name'] ) && isset( $details->name ) ) {
+					$data['name'] = $details->name;
+				}
+				if ( empty( $data['phone'] ) && isset( $details->phone ) ) {
+					$data['phone'] = $details->phone;
+				}
+
+				// Address from customer_details.
+				if ( empty( $data['address'] ) && isset( $details->address ) ) {
+					$addr = $details->address;
+					$data['address'] = array(
+						'line1'       => $addr->line1 ?? '',
+						'line2'       => $addr->line2 ?? '',
+						'city'        => $addr->city ?? '',
+						'state'       => $addr->state ?? '',
+						'postal_code' => $addr->postal_code ?? '',
+						'country'     => $addr->country ?? '',
+					);
+				}
+			}
+
+		} catch ( \Exception $e ) {
+			error_log( 'AA Customers Stripe: Failed to get customer details - ' . $e->getMessage() );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Sync payment to Xero
+	 *
+	 * @param object $session Stripe session.
+	 * @param object $member Member object.
+	 * @param object $product Product object.
+	 * @param array  $customer_data Customer data from Stripe.
+	 * @param float  $donation Donation amount.
+	 */
+	private function sync_to_xero( $session, $member, $product, $customer_data, $donation ) {
+		$xero_service = new AA_Customers_Xero_Service();
+
+		if ( ! $xero_service->is_connected() ) {
+			error_log( 'AA Customers Xero: Not connected, skipping sync.' );
+			return;
+		}
+
+		// Parse name into first/last.
+		$name_parts = explode( ' ', $customer_data['name'] ?? $member->first_name . ' ' . $member->last_name, 2 );
+
+		$payment_data = array(
+			'customer_name'      => $customer_data['name'] ?? $member->first_name . ' ' . $member->last_name,
+			'first_name'         => $name_parts[0] ?? $member->first_name,
+			'last_name'          => $name_parts[1] ?? $member->last_name,
+			'email'              => $customer_data['email'] ?? $member->email,
+			'phone'              => $customer_data['phone'] ?? $member->phone ?? '',
+			'address'            => $customer_data['address'] ?? array(),
+			'product_name'       => $product->name,
+			'amount'             => $product->price,
+			'donation'           => $donation,
+			'currency'           => strtoupper( $session->currency ?? 'GBP' ),
+			'stripe_payment_id'  => $session->payment_intent ?? $session->id,
+			'date'               => date( 'Y-m-d' ),
+		);
+
+		$result = $xero_service->sync_payment( $payment_data );
+
+		if ( is_wp_error( $result ) ) {
+			error_log( 'AA Customers Xero: Sync failed - ' . $result->get_error_message() );
+		} else {
+			error_log( 'AA Customers Xero: Payment synced successfully.' );
+		}
 	}
 
 	/**

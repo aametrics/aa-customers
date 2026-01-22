@@ -40,6 +40,7 @@ require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/services/class-email-service.php';
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/services/class-pdf-service.php';
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/services/class-stripe-service.php';
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/services/class-membership-service.php';
+require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/services/class-xero-service.php';
 
 // Include shared admin components.
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'admin/shared/class-base-admin.php';

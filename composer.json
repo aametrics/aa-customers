@@ -6,7 +6,8 @@
     "require": {
         "php": ">=7.4",
         "dompdf/dompdf": "^2.0",
-        "stripe/stripe-php": "^10.0"
+        "stripe/stripe-php": "^10.0",
+        "xeroapi/xero-php-oauth2": "^6.0"
     },
     "config": {
         "optimize-autoloader": true,
