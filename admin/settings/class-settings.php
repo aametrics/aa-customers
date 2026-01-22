@@ -74,6 +74,8 @@ class AA_Customers_Settings extends AA_Customers_Base_Admin {
 			'stripe_live_publishable'  => AA_Customers_Zap_Storage::get( 'stripe_live_publishable', '' ),
 			'stripe_live_secret'       => AA_Customers_Zap_Storage::get( 'stripe_live_secret', '' ),
 			'stripe_webhook_secret'    => AA_Customers_Zap_Storage::get( 'stripe_webhook_secret', '' ),
+			'stripe_collect_address'   => AA_Customers_Zap_Storage::get( 'stripe_collect_address', false ),
+			'stripe_collect_phone'     => AA_Customers_Zap_Storage::get( 'stripe_collect_phone', false ),
 
 			// Xero.
 			'xero_client_id'     => AA_Customers_Zap_Storage::get( 'xero_client_id', '' ),
@@ -316,6 +318,31 @@ class AA_Customers_Settings extends AA_Customers_Base_Admin {
 						   placeholder="whsec_...">
 				</td>
 			</tr>
+
+			<tr>
+				<th colspan="2"><h3><?php esc_html_e( 'Checkout Options', 'aa-customers' ); ?></h3></th>
+			</tr>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Collect Billing Address', 'aa-customers' ); ?></th>
+				<td>
+					<label>
+						<input type="checkbox" name="stripe_collect_address" value="1"
+							   <?php checked( $settings['stripe_collect_address'] ); ?>>
+						<?php esc_html_e( 'Require billing address during checkout', 'aa-customers' ); ?>
+					</label>
+					<p class="description"><?php esc_html_e( 'Enable this for invoicing/Xero integration.', 'aa-customers' ); ?></p>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><?php esc_html_e( 'Collect Phone Number', 'aa-customers' ); ?></th>
+				<td>
+					<label>
+						<input type="checkbox" name="stripe_collect_phone" value="1"
+							   <?php checked( $settings['stripe_collect_phone'] ); ?>>
+						<?php esc_html_e( 'Collect phone number during checkout', 'aa-customers' ); ?>
+					</label>
+				</td>
+			</tr>
 		</table>
 		<?php
 	}
@@ -400,6 +427,21 @@ class AA_Customers_Settings extends AA_Customers_Base_Admin {
 						   value="<?php echo esc_attr( AA_Customers_Zap_Storage::get( 'xero_stripe_account_code', '090' ) ); ?>" 
 						   class="small-text" placeholder="090">
 					<p class="description"><?php esc_html_e( 'The Xero account codes for sales revenue and your Stripe bank account.', 'aa-customers' ); ?></p>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row">
+					<label for="xero_tax_type"><?php esc_html_e( 'Tax Type', 'aa-customers' ); ?></label>
+				</th>
+				<td>
+					<?php $current_tax = AA_Customers_Zap_Storage::get( 'xero_tax_type', 'NONE' ); ?>
+					<select name="xero_tax_type" id="xero_tax_type">
+						<option value="NONE" <?php selected( $current_tax, 'NONE' ); ?>><?php esc_html_e( 'No Tax (Exempt)', 'aa-customers' ); ?></option>
+						<option value="OUTPUT2" <?php selected( $current_tax, 'OUTPUT2' ); ?>><?php esc_html_e( 'Standard Rate VAT (20%)', 'aa-customers' ); ?></option>
+						<option value="RRINPUT" <?php selected( $current_tax, 'RRINPUT' ); ?>><?php esc_html_e( 'Reduced Rate VAT (5%)', 'aa-customers' ); ?></option>
+						<option value="ZERORATEDOUTPUT" <?php selected( $current_tax, 'ZERORATEDOUTPUT' ); ?>><?php esc_html_e( 'Zero-Rated', 'aa-customers' ); ?></option>
+					</select>
+					<p class="description"><?php esc_html_e( 'How VAT/tax should be applied to invoices. For non-profit membership orgs, typically "No Tax".', 'aa-customers' ); ?></p>
 				</td>
 			</tr>
 			<tr>
@@ -553,6 +595,8 @@ class AA_Customers_Settings extends AA_Customers_Base_Admin {
 				AA_Customers_Zap_Storage::set( 'stripe_live_publishable', $this->post_param( 'stripe_live_publishable' ), 'sensitive' );
 				AA_Customers_Zap_Storage::set( 'stripe_live_secret', $this->post_param( 'stripe_live_secret' ), 'sensitive' );
 				AA_Customers_Zap_Storage::set( 'stripe_webhook_secret', $this->post_param( 'stripe_webhook_secret' ), 'sensitive' );
+				AA_Customers_Zap_Storage::set( 'stripe_collect_address', (bool) $this->post_param( 'stripe_collect_address' ), 'config' );
+				AA_Customers_Zap_Storage::set( 'stripe_collect_phone', (bool) $this->post_param( 'stripe_collect_phone' ), 'config' );
 				break;
 
 			case 'xero':
@@ -560,6 +604,7 @@ class AA_Customers_Settings extends AA_Customers_Base_Admin {
 				AA_Customers_Zap_Storage::set( 'xero_client_secret', $this->post_param( 'xero_client_secret' ), 'sensitive' );
 				AA_Customers_Zap_Storage::set( 'xero_sales_account', $this->post_param( 'xero_sales_account', '200' ), 'config' );
 				AA_Customers_Zap_Storage::set( 'xero_stripe_account_code', $this->post_param( 'xero_stripe_account_code', '090' ), 'config' );
+				AA_Customers_Zap_Storage::set( 'xero_tax_type', $this->post_param( 'xero_tax_type', 'NONE' ), 'config' );
 				break;
 
 			default:

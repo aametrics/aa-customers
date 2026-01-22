@@ -396,7 +396,7 @@ class AA_Customers_Xero_Service {
 			// Add phone if available.
 			if ( ! empty( $contact_data['phone'] ) ) {
 				$phone = new Phone();
-				$phone->setPhoneType( Phone::PHONE_TYPE_DEFAULT );
+				$phone->setPhoneType( 'DEFAULT' );
 				$phone->setPhoneNumber( $contact_data['phone'] );
 				$contact->setPhones( array( $phone ) );
 			}
@@ -404,7 +404,7 @@ class AA_Customers_Xero_Service {
 			// Add address if available.
 			if ( ! empty( $contact_data['address'] ) ) {
 				$address = new Address();
-				$address->setAddressType( Address::ADDRESS_TYPE_POBOX );
+				$address->setAddressType( 'POBOX' );
 				$address->setAddressLine1( $contact_data['address']['line1'] ?? '' );
 				$address->setAddressLine2( $contact_data['address']['line2'] ?? '' );
 				$address->setCity( $contact_data['address']['city'] ?? '' );
@@ -460,12 +460,16 @@ class AA_Customers_Xero_Service {
 			// Build line items.
 			$line_items = array();
 
+			// Get tax type from settings (default: NO TAX for exempt organizations).
+			$tax_type = AA_Customers_Zap_Storage::get( 'xero_tax_type', 'NONE' );
+
 			// Main product/service.
 			$line_item = new LineItem();
 			$line_item->setDescription( $invoice_data['description'] ?? 'Membership' );
 			$line_item->setQuantity( 1 );
 			$line_item->setUnitAmount( $invoice_data['amount'] ?? 0 );
 			$line_item->setAccountCode( $invoice_data['account_code'] ?? '200' ); // Default sales account.
+			$line_item->setTaxType( $tax_type );
 			$line_items[] = $line_item;
 
 			// Add donation if present.
@@ -475,6 +479,7 @@ class AA_Customers_Xero_Service {
 				$donation_item->setQuantity( 1 );
 				$donation_item->setUnitAmount( $invoice_data['donation'] );
 				$donation_item->setAccountCode( $invoice_data['donation_account_code'] ?? '200' );
+				$donation_item->setTaxType( 'NONE' ); // Donations are typically tax-free.
 				$line_items[] = $donation_item;
 			}
 

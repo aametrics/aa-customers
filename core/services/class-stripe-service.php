@@ -179,6 +179,10 @@ class AA_Customers_Stripe_Service {
 		$args = wp_parse_args( $args, $defaults );
 
 		try {
+			// Get checkout field settings.
+			$collect_address = (bool) AA_Customers_Zap_Storage::get( 'stripe_collect_address', false );
+			$collect_phone   = (bool) AA_Customers_Zap_Storage::get( 'stripe_collect_phone', false );
+
 			$session_params = array(
 				'payment_method_types' => array( 'card' ),
 				'line_items'           => array(
@@ -195,13 +199,19 @@ class AA_Customers_Stripe_Service {
 					'member_id'  => $args['member_id'],
 					'donation'   => $args['donation'],
 				),
-				// Collect billing address for invoices.
-				'billing_address_collection' => 'required',
-				// Collect phone number.
-				'phone_number_collection' => array(
-					'enabled' => true,
-				),
 			);
+
+			// Optionally collect billing address.
+			if ( $collect_address ) {
+				$session_params['billing_address_collection'] = 'required';
+			}
+
+			// Optionally collect phone number.
+			if ( $collect_phone ) {
+				$session_params['phone_number_collection'] = array(
+					'enabled' => true,
+				);
+			}
 
 			// For one-time payments, create customer and invoice.
 			if ( ! $args['is_subscription'] ) {
@@ -576,12 +586,13 @@ class AA_Customers_Stripe_Service {
 		}
 
 		// Parse name into first/last.
-		$name_parts = explode( ' ', $customer_data['name'] ?? $member->first_name . ' ' . $member->last_name, 2 );
+		$member_name = $member->full_name ?? '';
+		$name_parts  = explode( ' ', $customer_data['name'] ?? $member_name, 2 );
 
 		$payment_data = array(
-			'customer_name'      => $customer_data['name'] ?? $member->first_name . ' ' . $member->last_name,
-			'first_name'         => $name_parts[0] ?? $member->first_name,
-			'last_name'          => $name_parts[1] ?? $member->last_name,
+			'customer_name'      => $customer_data['name'] ?? $member_name,
+			'first_name'         => $name_parts[0] ?? '',
+			'last_name'          => $name_parts[1] ?? '',
 			'email'              => $customer_data['email'] ?? $member->email,
 			'phone'              => $customer_data['phone'] ?? $member->phone ?? '',
 			'address'            => $customer_data['address'] ?? array(),
