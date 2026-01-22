@@ -60,10 +60,12 @@ class AA_Customers_Settings extends AA_Customers_Base_Admin {
 		// Get current settings.
 		$settings = array(
 			// General.
-			'email_from_name'    => AA_Customers_Zap_Storage::get( 'email_from_name', get_bloginfo( 'name' ) ),
-			'email_from_address' => AA_Customers_Zap_Storage::get( 'email_from_address', get_option( 'admin_email' ) ),
-			'email_bcc_enabled'  => AA_Customers_Zap_Storage::get( 'email_bcc_enabled', false ),
-			'email_bcc_address'  => AA_Customers_Zap_Storage::get( 'email_bcc_address', '' ),
+			'email_from_name'       => AA_Customers_Zap_Storage::get( 'email_from_name', get_bloginfo( 'name' ) ),
+			'email_from_address'    => AA_Customers_Zap_Storage::get( 'email_from_address', get_option( 'admin_email' ) ),
+			'email_bcc_enabled'     => AA_Customers_Zap_Storage::get( 'email_bcc_enabled', false ),
+			'email_bcc_address'     => AA_Customers_Zap_Storage::get( 'email_bcc_address', '' ),
+			'checkout_success_url'  => AA_Customers_Zap_Storage::get( 'checkout_success_url', '/checkout-success' ),
+			'member_dashboard_url'  => AA_Customers_Zap_Storage::get( 'member_dashboard_url', '/member-dashboard' ),
 
 			// Stripe.
 			'stripe_mode'              => AA_Customers_Zap_Storage::get( 'stripe_mode', 'test' ),
@@ -182,6 +184,38 @@ class AA_Customers_Settings extends AA_Customers_Base_Admin {
 				<td>
 					<input type="email" name="email_bcc_address" id="email_bcc_address"
 						   value="<?php echo esc_attr( $settings['email_bcc_address'] ); ?>" class="regular-text">
+				</td>
+			</tr>
+
+			<tr>
+				<th colspan="2"><h3><?php esc_html_e( 'Page URLs', 'aa-customers' ); ?></h3></th>
+			</tr>
+			<tr>
+				<th scope="row">
+					<label for="checkout_success_url"><?php esc_html_e( 'Checkout Success Page', 'aa-customers' ); ?></label>
+				</th>
+				<td>
+					<input type="text" name="checkout_success_url" id="checkout_success_url"
+						   value="<?php echo esc_attr( $settings['checkout_success_url'] ); ?>" class="regular-text"
+						   placeholder="/checkout-success">
+					<p class="description">
+						<?php esc_html_e( 'Path to the checkout success page (relative to site root, e.g., /checkout-success)', 'aa-customers' ); ?>
+						<br><strong><?php esc_html_e( 'Full URL:', 'aa-customers' ); ?></strong> 
+						<code><?php echo esc_url( home_url( $settings['checkout_success_url'] ) ); ?></code>
+					</p>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row">
+					<label for="member_dashboard_url"><?php esc_html_e( 'Member Dashboard Page', 'aa-customers' ); ?></label>
+				</th>
+				<td>
+					<input type="text" name="member_dashboard_url" id="member_dashboard_url"
+						   value="<?php echo esc_attr( $settings['member_dashboard_url'] ); ?>" class="regular-text"
+						   placeholder="/member-dashboard">
+					<p class="description">
+						<?php esc_html_e( 'Path to the member dashboard page (relative to site root)', 'aa-customers' ); ?>
+					</p>
 				</td>
 			</tr>
 		</table>
@@ -533,6 +567,8 @@ class AA_Customers_Settings extends AA_Customers_Base_Admin {
 				AA_Customers_Zap_Storage::set( 'email_from_address', $this->post_param( 'email_from_address' ), 'config' );
 				AA_Customers_Zap_Storage::set( 'email_bcc_enabled', (bool) $this->post_param( 'email_bcc_enabled' ), 'config' );
 				AA_Customers_Zap_Storage::set( 'email_bcc_address', $this->post_param( 'email_bcc_address' ), 'config' );
+				AA_Customers_Zap_Storage::set( 'checkout_success_url', $this->post_param( 'checkout_success_url', '/checkout-success' ), 'config' );
+				AA_Customers_Zap_Storage::set( 'member_dashboard_url', $this->post_param( 'member_dashboard_url', '/member-dashboard' ), 'config' );
 				break;
 		}
 

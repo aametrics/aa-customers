@@ -94,8 +94,9 @@ class AA_Customers_Ajax_Handler {
 		}
 
 		// Build success/cancel URLs.
-		$success_url = add_query_arg( 'session_id', '{CHECKOUT_SESSION_ID}', home_url( '/checkout/success' ) );
-		$cancel_url = wp_get_referer() ?: home_url();
+		$success_path = AA_Customers_Zap_Storage::get( 'checkout_success_url', '/checkout-success' );
+		$success_url  = add_query_arg( 'session_id', '{CHECKOUT_SESSION_ID}', home_url( $success_path ) );
+		$cancel_url   = wp_get_referer() ?: home_url();
 
 		// Create checkout session.
 		$session = $stripe_service->create_checkout_session( array(
