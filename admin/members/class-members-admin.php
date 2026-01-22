@@ -522,7 +522,7 @@ class AA_Customers_Members_Admin extends AA_Customers_Base_Admin {
 	 * @return void
 	 */
 	private function handle_save_member() {
-		if ( ! $this->verify_nonce( 'aa_customers_save_member', 'aa_customers_nonce' ) ) {
+		if ( ! $this->verify_nonce( 'aa_customers_nonce', 'aa_customers_save_member' ) ) {
 			return;
 		}
 
@@ -570,11 +570,12 @@ class AA_Customers_Members_Admin extends AA_Customers_Base_Admin {
 			$type = $member_id ? 'success' : 'error';
 		}
 
-		$redirect_url = $member_id && $type === 'success'
-			? admin_url( 'admin.php?page=aa-customers-members&action=edit&id=' . $member_id )
-			: admin_url( 'admin.php?page=aa-customers-members' );
-
-		$this->redirect_with_message( $redirect_url, $message, $type );
+		if ( $type === 'success' ) {
+			$extra_args = $member_id ? array( 'action' => 'edit', 'id' => $member_id ) : array();
+			$this->redirect_with_message( 'aa-customers-members', 'saved', $extra_args );
+		} else {
+			$this->redirect_with_error( 'aa-customers-members', 'save_failed' );
+		}
 	}
 
 	/**

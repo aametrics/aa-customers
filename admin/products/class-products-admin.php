@@ -364,7 +364,7 @@ class AA_Customers_Products_Admin extends AA_Customers_Base_Admin {
 	 * @return void
 	 */
 	private function handle_save_product() {
-		if ( ! $this->verify_nonce( 'aa_customers_save_product', 'aa_customers_nonce' ) ) {
+		if ( ! $this->verify_nonce( 'aa_customers_nonce', 'aa_customers_save_product' ) ) {
 			return;
 		}
 
@@ -396,11 +396,12 @@ class AA_Customers_Products_Admin extends AA_Customers_Base_Admin {
 			$type = $product_id ? 'success' : 'error';
 		}
 
-		$redirect_url = $product_id && $type === 'success'
-			? admin_url( 'admin.php?page=aa-customers-products&action=edit&id=' . $product_id )
-			: admin_url( 'admin.php?page=aa-customers-products' );
-
-		$this->redirect_with_message( $redirect_url, $message, $type );
+		if ( $type === 'success' ) {
+			$extra_args = $product_id ? array( 'action' => 'edit', 'id' => $product_id ) : array();
+			$this->redirect_with_message( 'aa-customers-products', 'saved', $extra_args );
+		} else {
+			$this->redirect_with_error( 'aa-customers-products', 'save_failed' );
+		}
 	}
 
 	/**

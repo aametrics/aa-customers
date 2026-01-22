@@ -401,6 +401,28 @@ class AA_Customers_Admin extends AA_Customers_Base_Admin {
 			$log[] = 'Options table: OK';
 		}
 
+		// Create zap table (settings storage).
+		$table_name = $db->prefix . 'zap';
+		$log[] = 'Creating table: ' . $table_name;
+
+		$sql = "CREATE TABLE IF NOT EXISTS $table_name (
+			zap_key VARCHAR(255) NOT NULL,
+			zap_value LONGTEXT NULL,
+			zap_lock TINYINT(1) DEFAULT 0,
+			zap_tag VARCHAR(50) DEFAULT 'config',
+			zap_stamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+			zap_pulse DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			PRIMARY KEY (zap_key),
+			KEY idx_tag (zap_tag)
+		) $charset_collate;";
+
+		$result = $db->query( $sql );
+		if ( false === $result ) {
+			$log[] = 'ERROR creating zap table: ' . $db->last_error;
+		} else {
+			$log[] = 'Zap table: OK';
+		}
+
 		// Verify tables were created.
 		$check_table = $db->prefix . 'members';
 		$exists = $db->get_var( $db->prepare( 'SHOW TABLES LIKE %s', $check_table ) );
@@ -423,9 +445,10 @@ class AA_Customers_Admin extends AA_Customers_Base_Admin {
 	 */
 	private function get_database_status() {
 		$status = array(
-			'connected'     => false,
-			'tables_exist'  => false,
-			'error'         => '',
+			'connected'      => false,
+			'tables_exist'   => false,
+			'missing_tables' => array(),
+			'error'          => '',
 		);
 
 		if ( ! AA_Customers_DB_Connection::is_separate_database() ) {
@@ -441,10 +464,20 @@ class AA_Customers_Admin extends AA_Customers_Base_Admin {
 			if ( 1 === (int) $test ) {
 				$status['connected'] = true;
 
-				// Check if tables exist.
-				$table_name = $db->prefix . 'members';
-				$table_exists = $db->get_var( $db->prepare( 'SHOW TABLES LIKE %s', $table_name ) );
-				$status['tables_exist'] = ! empty( $table_exists );
+				// Check all required tables.
+				$required_tables = array( 'members', 'products', 'events', 'purchases', 'registrations', 'options', 'zap' );
+				$missing = array();
+
+				foreach ( $required_tables as $table ) {
+					$table_name = $db->prefix . $table;
+					$exists = $db->get_var( $db->prepare( 'SHOW TABLES LIKE %s', $table_name ) );
+					if ( empty( $exists ) ) {
+						$missing[] = $table;
+					}
+				}
+
+				$status['missing_tables'] = $missing;
+				$status['tables_exist'] = empty( $missing );
 			} else {
 				$status['error'] = 'Connection test failed';
 			}
@@ -489,7 +522,7 @@ class AA_Customers_Admin extends AA_Customers_Base_Admin {
 			<?php endif; ?>
 
 			<!-- Database Status -->
-			<div class="notice notice-<?php echo $db_status['connected'] ? 'success' : 'error'; ?>" style="padding: 15px;">
+			<div class="notice notice-<?php echo $db_status['connected'] && $db_status['tables_exist'] ? 'success' : 'warning'; ?>" style="padding: 15px;">
 				<strong>Database Status:</strong>
 				<ul style="margin: 10px 0 0 20px;">
 					<li>Constants Defined: <?php echo $db_configured ? '✓ Yes' : '✗ No'; ?></li>
@@ -497,14 +530,17 @@ class AA_Customers_Admin extends AA_Customers_Base_Admin {
 						<li>Database Name: <?php echo esc_html( defined( 'AA_CRM_DB_NAME' ) ? AA_CRM_DB_NAME : 'Not set' ); ?></li>
 						<li>Table Prefix: <?php echo esc_html( defined( 'AA_CRM_DB_PREFIX' ) ? AA_CRM_DB_PREFIX : 'crm_' ); ?></li>
 						<li>Connection: <?php echo $db_status['connected'] ? '✓ Connected' : '✗ Failed'; ?></li>
-						<li>Tables Exist: <?php echo $db_status['tables_exist'] ? '✓ Yes' : '✗ No'; ?></li>
+						<li>All Tables Exist: <?php echo $db_status['tables_exist'] ? '✓ Yes' : '✗ No'; ?></li>
+						<?php if ( ! empty( $db_status['missing_tables'] ) ) : ?>
+							<li style="color: orange;">Missing Tables: <?php echo esc_html( implode( ', ', $db_status['missing_tables'] ) ); ?></li>
+						<?php endif; ?>
 						<?php if ( ! empty( $db_status['error'] ) ) : ?>
 							<li style="color: red;">Error: <?php echo esc_html( $db_status['error'] ); ?></li>
 						<?php endif; ?>
-						<?php if ( ! $db_status['tables_exist'] ) : ?>
+						<?php if ( ! $db_status['tables_exist'] || ! empty( $db_status['missing_tables'] ) ) : ?>
 							<li style="margin-top: 10px;">
 								<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=aa-customers&create_tables=1' ), 'aa_create_tables' ) ); ?>" class="button button-primary">
-									Create Tables Now
+									Create Missing Tables
 								</a>
 							</li>
 						<?php endif; ?>

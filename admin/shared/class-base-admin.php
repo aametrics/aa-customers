@@ -41,12 +41,13 @@ abstract class AA_Customers_Base_Admin {
 	 *
 	 * @param string $nonce_field The nonce field name.
 	 * @param string $nonce_action The nonce action.
-	 * @return void Dies if nonce verification fails.
+	 * @return bool True if valid, dies if invalid.
 	 */
 	protected function verify_nonce( $nonce_field, $nonce_action ) {
 		if ( ! isset( $_POST[ $nonce_field ] ) || ! wp_verify_nonce( $_POST[ $nonce_field ], $nonce_action ) ) {
 			wp_die( esc_html__( 'Security check failed', 'aa-customers' ) );
 		}
+		return true;
 	}
 
 	/**

@@ -195,11 +195,27 @@ class AA_Customers_Stripe_Service {
 					'member_id'  => $args['member_id'],
 					'donation'   => $args['donation'],
 				),
+				// Collect billing address for invoices.
+				'billing_address_collection' => 'required',
+				// Collect phone number.
+				'phone_number_collection' => array(
+					'enabled' => true,
+				),
 			);
+
+			// For one-time payments, create customer and invoice.
+			if ( ! $args['is_subscription'] ) {
+				$session_params['customer_creation'] = 'always';
+				$session_params['invoice_creation'] = array(
+					'enabled' => true,
+				);
+			}
 
 			// Add customer if available.
 			if ( ! empty( $args['customer_id'] ) ) {
 				$session_params['customer'] = $args['customer_id'];
+				// Remove customer_creation if we're using existing customer.
+				unset( $session_params['customer_creation'] );
 			} elseif ( ! empty( $args['customer_email'] ) ) {
 				$session_params['customer_email'] = $args['customer_email'];
 			}

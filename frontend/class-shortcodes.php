@@ -22,7 +22,8 @@ class AA_Customers_Shortcodes {
 	 * Constructor
 	 */
 	public function __construct() {
-		add_action( 'init', array( $this, 'register_shortcodes' ) );
+		// Register shortcodes immediately (we're already on 'init' or later).
+		$this->register_shortcodes();
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 	}
 
