@@ -47,6 +47,13 @@ class AA_Customers_Admin extends AA_Customers_Base_Admin {
 	private $purchases_admin;
 
 	/**
+	 * Forms admin
+	 *
+	 * @var AA_Customers_Forms_Admin
+	 */
+	private $forms_admin;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -58,6 +65,7 @@ class AA_Customers_Admin extends AA_Customers_Base_Admin {
 		$this->products_admin  = new AA_Customers_Products_Admin();
 		$this->events_admin    = new AA_Customers_Events_Admin();
 		$this->purchases_admin = new AA_Customers_Purchases_Admin();
+		$this->forms_admin     = new AA_Customers_Forms_Admin();
 	}
 
 	/**
@@ -126,6 +134,16 @@ class AA_Customers_Admin extends AA_Customers_Base_Admin {
 			'aa-customers-purchases',
 			array( $this, 'render_purchases' )
 		);
+
+		// Data Collection (Forms) submenu.
+		add_submenu_page(
+			'aa-customers',
+			__( 'Data Collection', 'aa-customers' ),
+			__( 'Data Collection', 'aa-customers' ),
+			'manage_options',
+			'aa-customers-forms',
+			array( $this, 'render_forms' )
+		);
 	}
 
 	/**
@@ -152,7 +170,7 @@ class AA_Customers_Admin extends AA_Customers_Base_Admin {
 		wp_enqueue_script(
 			'aa-customers-admin',
 			AA_CUSTOMERS_PLUGIN_URL . 'assets/js/admin.js',
-			array( 'jquery' ),
+			array( 'jquery', 'jquery-ui-sortable' ),
 			AA_CUSTOMERS_VERSION,
 			true
 		);
@@ -726,5 +744,18 @@ define('AA_CRM_ENCRYPTION_KEY', 'your_encryption_key');</pre>
 		}
 
 		$this->purchases_admin->render();
+	}
+
+	/**
+	 * Render data collection forms page
+	 *
+	 * @return void
+	 */
+	public function render_forms() {
+		if ( ! $this->check_capability() ) {
+			wp_die( __( 'Unauthorized access', 'aa-customers' ) );
+		}
+
+		$this->forms_admin->render();
 	}
 }

@@ -39,6 +39,7 @@ class AA_Customers_Shortcodes {
 		add_shortcode( 'aa_events', array( $this, 'render_events_list' ) );
 		add_shortcode( 'aa_event', array( $this, 'render_single_event' ) );
 		add_shortcode( 'aa_checkout_success', array( $this, 'render_checkout_success' ) );
+		add_shortcode( 'aa_checkout', array( $this, 'render_checkout_flow' ) );
 	}
 
 	/**
@@ -61,6 +62,7 @@ class AA_Customers_Shortcodes {
 			'aa_events',
 			'aa_event',
 			'aa_checkout_success',
+			'aa_checkout',
 		);
 
 		$has_shortcode = false;
@@ -663,5 +665,411 @@ class AA_Customers_Shortcodes {
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Render checkout flow
+	 *
+	 * Multi-step checkout: email check → login/form → Stripe
+	 *
+	 * @param array $atts Shortcode attributes.
+	 * @return string HTML output.
+	 */
+	public function render_checkout_flow( $atts ) {
+		$atts = shortcode_atts(
+			array(
+				'product_id' => 0,
+			),
+			$atts,
+			'aa_checkout'
+		);
+
+		$product_id = absint( $atts['product_id'] );
+
+		// If no product ID provided, try to get from URL.
+		if ( ! $product_id && isset( $_GET['product'] ) ) {
+			$product_id = absint( $_GET['product'] );
+		}
+
+		// Get product.
+		$products_repo = new AA_Customers_Products_Repository();
+		$product       = $product_id ? $products_repo->get_by_id( $product_id ) : null;
+
+		if ( ! $product ) {
+			return '<div class="aa-error">Product not found. Please select a valid product.</div>';
+		}
+
+		// Get form for this product.
+		$forms_repo = new AA_Customers_Forms_Repository();
+		$form       = $forms_repo->get_for_product( $product_id );
+
+		ob_start();
+		?>
+		<div class="aa-checkout-flow" data-product-id="<?php echo esc_attr( $product_id ); ?>">
+			<?php if ( is_user_logged_in() ) : ?>
+				<?php $this->render_checkout_form_step( $product, $form ); ?>
+			<?php else : ?>
+				<?php $this->render_email_check_step( $product ); ?>
+			<?php endif; ?>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
+
+	/**
+	 * Render email check step
+	 *
+	 * @param object $product Product object.
+	 * @return void
+	 */
+	private function render_email_check_step( $product ) {
+		?>
+		<div class="aa-checkout-step" id="step-email">
+			<h2><?php echo esc_html( $product->name ); ?></h2>
+			<p class="aa-product-price">£<?php echo esc_html( number_format( $product->price, 2 ) ); ?></p>
+
+			<div class="aa-checkout-card">
+				<h3>Let's get started</h3>
+				<p>Enter your email to check if you already have an account.</p>
+
+				<form id="aa-email-check-form" class="aa-form">
+					<?php wp_nonce_field( 'aa_checkout_nonce', '_wpnonce' ); ?>
+					<input type="hidden" name="product_id" value="<?php echo esc_attr( $product->id ); ?>">
+
+					<div class="aa-form-row">
+						<label for="checkout_email">Email Address <span class="required">*</span></label>
+						<input type="email" id="checkout_email" name="email" required>
+					</div>
+
+					<div class="aa-form-actions">
+						<button type="submit" class="aa-button">Continue</button>
+					</div>
+				</form>
+
+				<div id="aa-email-result" style="display:none;"></div>
+			</div>
+		</div>
+
+		<script>
+		jQuery(function($) {
+			$('#aa-email-check-form').on('submit', function(e) {
+				e.preventDefault();
+				var form = $(this);
+				var email = $('#checkout_email').val();
+				var productId = form.find('input[name="product_id"]').val();
+
+				$.post(aa_customers.ajax_url, {
+					action: 'aa_customers_check_email',
+					email: email,
+					product_id: productId,
+					_wpnonce: form.find('input[name="_wpnonce"]').val()
+				}, function(response) {
+					if (response.success) {
+						if (response.data.exists) {
+							// Show login form.
+							$('#aa-email-result').html(response.data.html).show();
+							form.hide();
+						} else {
+							// Show registration form.
+							$('#aa-email-result').html(response.data.html).show();
+							form.hide();
+						}
+					} else {
+						alert(response.data.message || 'An error occurred.');
+					}
+				});
+			});
+		});
+		</script>
+		<?php
+	}
+
+	/**
+	 * Render checkout form step (for logged in users or after email check)
+	 *
+	 * @param object      $product Product object.
+	 * @param object|null $form    Form object.
+	 * @return void
+	 */
+	private function render_checkout_form_step( $product, $form ) {
+		$user   = wp_get_current_user();
+		$fields = $form ? ( new AA_Customers_Forms_Repository() )->get_fields( $form->id ) : array();
+
+		// Get existing member data if any.
+		$members_repo = new AA_Customers_Members_Repository();
+		$member       = $members_repo->get_by_wp_user_id( $user->ID );
+		?>
+		<div class="aa-checkout-step" id="step-form">
+			<h2><?php echo esc_html( $product->name ); ?></h2>
+			<p class="aa-product-price">£<?php echo esc_html( number_format( $product->price, 2 ) ); ?></p>
+
+			<?php if ( $form && $form->description ) : ?>
+				<p class="aa-form-description"><?php echo esc_html( $form->description ); ?></p>
+			<?php endif; ?>
+
+			<form id="aa-checkout-form" class="aa-form">
+				<?php wp_nonce_field( 'aa_checkout_submit', '_wpnonce' ); ?>
+				<input type="hidden" name="product_id" value="<?php echo esc_attr( $product->id ); ?>">
+				<input type="hidden" name="form_id" value="<?php echo esc_attr( $form ? $form->id : 0 ); ?>">
+
+				<?php if ( empty( $fields ) ) : ?>
+					<!-- Default fields if no form defined -->
+					<div class="aa-form-row">
+						<label for="full_name">Full Name <span class="required">*</span></label>
+						<input type="text" id="full_name" name="full_name" required
+							   value="<?php echo esc_attr( $member->full_name ?? $user->display_name ); ?>">
+					</div>
+
+					<div class="aa-form-row">
+						<label for="email">Email <span class="required">*</span></label>
+						<input type="email" id="email" name="email" required
+							   value="<?php echo esc_attr( $member->email ?? $user->user_email ); ?>">
+					</div>
+				<?php else : ?>
+					<?php foreach ( $fields as $field ) : ?>
+						<?php $this->render_form_field( $field, $member ); ?>
+					<?php endforeach; ?>
+				<?php endif; ?>
+
+				<?php if ( $product->allow_donation ) : ?>
+					<div class="aa-form-row aa-donation-row">
+						<label for="donation">Add a donation (optional)</label>
+						<div class="aa-donation-options">
+							<button type="button" class="aa-donation-btn" data-amount="0">No thanks</button>
+							<button type="button" class="aa-donation-btn" data-amount="5">£5</button>
+							<button type="button" class="aa-donation-btn" data-amount="10">£10</button>
+							<button type="button" class="aa-donation-btn" data-amount="25">£25</button>
+							<input type="number" id="donation" name="donation" min="0" step="1" value="0" placeholder="Other amount">
+						</div>
+					</div>
+				<?php endif; ?>
+
+				<div class="aa-checkout-summary">
+					<div class="aa-summary-row">
+						<span><?php echo esc_html( $product->name ); ?></span>
+						<span>£<?php echo esc_html( number_format( $product->price, 2 ) ); ?></span>
+					</div>
+					<div class="aa-summary-row aa-donation-summary" style="display:none;">
+						<span>Donation</span>
+						<span class="aa-donation-amount">£0.00</span>
+					</div>
+					<div class="aa-summary-row aa-total">
+						<span>Total</span>
+						<span class="aa-total-amount">£<?php echo esc_html( number_format( $product->price, 2 ) ); ?></span>
+					</div>
+				</div>
+
+				<div class="aa-form-actions">
+					<button type="submit" class="aa-button aa-button-primary">
+						Proceed to Payment
+					</button>
+				</div>
+
+				<p class="aa-checkout-note">
+					You'll be redirected to our secure payment provider to complete your payment.
+				</p>
+			</form>
+		</div>
+
+		<script>
+		jQuery(function($) {
+			var basePrice = <?php echo esc_js( $product->price ); ?>;
+
+			// Donation buttons.
+			$('.aa-donation-btn').on('click', function() {
+				var amount = $(this).data('amount');
+				$('#donation').val(amount);
+				$('.aa-donation-btn').removeClass('active');
+				$(this).addClass('active');
+				updateTotal();
+			});
+
+			$('#donation').on('input', function() {
+				$('.aa-donation-btn').removeClass('active');
+				updateTotal();
+			});
+
+			function updateTotal() {
+				var donation = parseFloat($('#donation').val()) || 0;
+				var total = basePrice + donation;
+
+				if (donation > 0) {
+					$('.aa-donation-summary').show().find('.aa-donation-amount').text('£' + donation.toFixed(2));
+				} else {
+					$('.aa-donation-summary').hide();
+				}
+
+				$('.aa-total-amount').text('£' + total.toFixed(2));
+			}
+
+			// Form submission.
+			$('#aa-checkout-form').on('submit', function(e) {
+				e.preventDefault();
+				var form = $(this);
+				var btn = form.find('button[type="submit"]');
+
+				btn.prop('disabled', true).text('Processing...');
+
+				$.post(aa_customers.ajax_url, form.serialize() + '&action=aa_customers_checkout_submit', function(response) {
+					if (response.success && response.data.checkout_url) {
+						window.location.href = response.data.checkout_url;
+					} else {
+						alert(response.data.message || 'An error occurred. Please try again.');
+						btn.prop('disabled', false).text('Proceed to Payment');
+					}
+				}).fail(function() {
+					alert('Connection error. Please try again.');
+					btn.prop('disabled', false).text('Proceed to Payment');
+				});
+			});
+		});
+		</script>
+		<?php
+	}
+
+	/**
+	 * Render a single form field
+	 *
+	 * @param object      $field  Field object.
+	 * @param object|null $member Member object for pre-filling.
+	 * @return void
+	 */
+	private function render_form_field( $field, $member = null ) {
+		$value       = '';
+		$column      = $field->target_column;
+		$required    = $field->required ? 'required' : '';
+		$required_mark = $field->required ? '<span class="required">*</span>' : '';
+
+		// Get existing value from member.
+		if ( $member && isset( $member->$column ) ) {
+			$value = $member->$column;
+		}
+
+		// Parse options.
+		$options = array();
+		if ( ! empty( $field->options_json ) ) {
+			$lines = explode( "\n", $field->options_json );
+			foreach ( $lines as $line ) {
+				$line = trim( $line );
+				if ( ! empty( $line ) ) {
+					$options[] = $line;
+				}
+			}
+		}
+		?>
+		<div class="aa-form-row aa-form-field-<?php echo esc_attr( $field->display_type ); ?>">
+			<label for="field_<?php echo esc_attr( $field->id ); ?>">
+				<?php echo esc_html( $field->label ); ?> <?php echo $required_mark; ?>
+			</label>
+
+			<?php
+			switch ( $field->display_type ) {
+				case 'textarea':
+					?>
+					<textarea id="field_<?php echo esc_attr( $field->id ); ?>"
+							  name="fields[<?php echo esc_attr( $column ); ?>]"
+							  placeholder="<?php echo esc_attr( $field->placeholder ); ?>"
+							  <?php echo $required; ?>><?php echo esc_textarea( $value ); ?></textarea>
+					<?php
+					break;
+
+				case 'dropdown':
+					?>
+					<select id="field_<?php echo esc_attr( $field->id ); ?>"
+							name="fields[<?php echo esc_attr( $column ); ?>]"
+							<?php echo $required; ?>>
+						<option value="">— Select —</option>
+						<?php foreach ( $options as $opt ) : ?>
+							<option value="<?php echo esc_attr( $opt ); ?>" <?php selected( $value, $opt ); ?>>
+								<?php echo esc_html( $opt ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+					<?php
+					break;
+
+				case 'radio':
+					?>
+					<div class="aa-radio-group">
+						<?php foreach ( $options as $i => $opt ) : ?>
+							<label class="aa-radio-label">
+								<input type="radio" name="fields[<?php echo esc_attr( $column ); ?>]"
+									   value="<?php echo esc_attr( $opt ); ?>"
+									   <?php checked( $value, $opt ); ?>
+									   <?php echo ( $i === 0 && $required ) ? $required : ''; ?>>
+								<?php echo esc_html( $opt ); ?>
+							</label>
+						<?php endforeach; ?>
+					</div>
+					<?php
+					break;
+
+				case 'checkbox':
+					?>
+					<label class="aa-checkbox-label">
+						<input type="checkbox" id="field_<?php echo esc_attr( $field->id ); ?>"
+							   name="fields[<?php echo esc_attr( $column ); ?>]"
+							   value="1" <?php checked( $value ); ?>>
+						<?php echo esc_html( $field->placeholder ?: 'Yes' ); ?>
+					</label>
+					<?php
+					break;
+
+				case 'date':
+					?>
+					<input type="date" id="field_<?php echo esc_attr( $field->id ); ?>"
+						   name="fields[<?php echo esc_attr( $column ); ?>]"
+						   value="<?php echo esc_attr( $value ); ?>"
+						   <?php echo $required; ?>>
+					<?php
+					break;
+
+				case 'email':
+					?>
+					<input type="email" id="field_<?php echo esc_attr( $field->id ); ?>"
+						   name="fields[<?php echo esc_attr( $column ); ?>]"
+						   value="<?php echo esc_attr( $value ); ?>"
+						   placeholder="<?php echo esc_attr( $field->placeholder ); ?>"
+						   <?php echo $required; ?>>
+					<?php
+					break;
+
+				case 'tel':
+					?>
+					<input type="tel" id="field_<?php echo esc_attr( $field->id ); ?>"
+						   name="fields[<?php echo esc_attr( $column ); ?>]"
+						   value="<?php echo esc_attr( $value ); ?>"
+						   placeholder="<?php echo esc_attr( $field->placeholder ); ?>"
+						   <?php echo $required; ?>>
+					<?php
+					break;
+
+				case 'number':
+					?>
+					<input type="number" id="field_<?php echo esc_attr( $field->id ); ?>"
+						   name="fields[<?php echo esc_attr( $column ); ?>]"
+						   value="<?php echo esc_attr( $value ); ?>"
+						   placeholder="<?php echo esc_attr( $field->placeholder ); ?>"
+						   <?php echo $required; ?>>
+					<?php
+					break;
+
+				default: // text
+					?>
+					<input type="text" id="field_<?php echo esc_attr( $field->id ); ?>"
+						   name="fields[<?php echo esc_attr( $column ); ?>]"
+						   value="<?php echo esc_attr( $value ); ?>"
+						   placeholder="<?php echo esc_attr( $field->placeholder ); ?>"
+						   <?php echo $required; ?>>
+					<?php
+					break;
+			}
+			?>
+
+			<?php if ( $field->help_text ) : ?>
+				<p class="aa-field-help"><?php echo esc_html( $field->help_text ); ?></p>
+			<?php endif; ?>
+		</div>
+		<?php
 	}
 }

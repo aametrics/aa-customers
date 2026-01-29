@@ -431,7 +431,7 @@ class AA_Customers_Products_Admin extends AA_Customers_Base_Admin {
 	 * @param string $status Status string.
 	 * @return string HTML badge.
 	 */
-	private function get_status_badge( $status ) {
+	protected function get_status_badge( $status ) {
 		$badges = array(
 			'active'   => '<span class="aa-customers-badge badge-active">Active</span>',
 			'draft'    => '<span class="aa-customers-badge badge-pending">Draft</span>',

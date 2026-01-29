@@ -101,10 +101,11 @@ abstract class AA_Customers_Base_Admin {
 	 */
 	protected function render_admin_notices() {
 		$success_messages = array(
-			'saved'   => __( 'Successfully saved.', 'aa-customers' ),
-			'created' => __( 'Successfully created.', 'aa-customers' ),
-			'updated' => __( 'Successfully updated.', 'aa-customers' ),
-			'deleted' => __( 'Successfully deleted.', 'aa-customers' ),
+			'saved'      => __( 'Successfully saved.', 'aa-customers' ),
+			'created'    => __( 'Successfully created.', 'aa-customers' ),
+			'updated'    => __( 'Successfully updated.', 'aa-customers' ),
+			'deleted'    => __( 'Successfully deleted.', 'aa-customers' ),
+			'duplicated' => __( 'Successfully duplicated.', 'aa-customers' ),
 		);
 
 		$error_messages = array(
@@ -248,5 +249,34 @@ abstract class AA_Customers_Base_Admin {
 	 */
 	protected function is_admin_hook( $hook, $page_identifier ) {
 		return false !== strpos( $hook, $page_identifier );
+	}
+
+	/**
+	 * Get HTML for a status badge
+	 *
+	 * @param string $status The status value.
+	 * @return string HTML for the status badge.
+	 */
+	protected function get_status_badge( $status ) {
+		$colors = array(
+			'active'    => '#00a32a',
+			'draft'     => '#72777c',
+			'pending'   => '#dba617',
+			'confirmed' => '#00a32a',
+			'cancelled' => '#d63638',
+			'expired'   => '#72777c',
+			'past_due'  => '#dba617',
+			'succeeded' => '#00a32a',
+			'failed'    => '#d63638',
+			'refunded'  => '#72777c',
+		);
+
+		$color = $colors[ $status ] ?? '#72777c';
+
+		return sprintf(
+			'<span class="aa-status-badge" style="background-color: %s; color: #fff; padding: 3px 8px; border-radius: 3px; font-size: 11px; text-transform: uppercase;">%s</span>',
+			esc_attr( $color ),
+			esc_html( ucfirst( $status ) )
+		);
 	}
 }

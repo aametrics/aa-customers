@@ -33,6 +33,7 @@ require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/repositories/class-products-reposit
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/repositories/class-purchases-repository.php';
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/repositories/class-events-repository.php';
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/repositories/class-registrations-repository.php';
+require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/repositories/class-forms-repository.php';
 
 // Include core services.
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'core/services/class-zap-storage.php';
@@ -50,6 +51,7 @@ require_once AA_CUSTOMERS_PLUGIN_DIR . 'admin/members/class-members-admin.php';
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'admin/products/class-products-admin.php';
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'admin/events/class-events-admin.php';
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'admin/purchases/class-purchases-admin.php';
+require_once AA_CUSTOMERS_PLUGIN_DIR . 'admin/forms/class-forms-admin.php';
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'admin/class-admin.php';
 require_once AA_CUSTOMERS_PLUGIN_DIR . 'admin/settings/class-settings.php';
 

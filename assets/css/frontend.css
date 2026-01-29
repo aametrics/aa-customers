@@ -605,3 +605,270 @@
 		gap: 15px;
 	}
 }
+
+/* ==========================================
+   CHECKOUT FLOW
+   ========================================== */
+
+.aa-checkout-flow {
+	max-width: 600px;
+	margin: 0 auto;
+	padding: 20px;
+}
+
+.aa-checkout-step {
+	animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+	from { opacity: 0; transform: translateY(10px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+.aa-checkout-step h2 {
+	margin: 0 0 10px;
+	font-size: 1.8em;
+}
+
+.aa-product-price {
+	font-size: 1.5em;
+	font-weight: 600;
+	color: #2271b1;
+	margin-bottom: 25px;
+}
+
+.aa-checkout-card {
+	background: #fff;
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+	padding: 30px;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.aa-checkout-card h3 {
+	margin: 0 0 10px;
+	font-size: 1.3em;
+}
+
+.aa-checkout-card > p {
+	color: #666;
+	margin-bottom: 25px;
+}
+
+/* Form Styles */
+.aa-form {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.aa-form-row {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.aa-form-row label {
+	font-weight: 500;
+	color: #333;
+}
+
+.aa-form-row label .required {
+	color: #d63638;
+}
+
+.aa-form-row input[type="text"],
+.aa-form-row input[type="email"],
+.aa-form-row input[type="password"],
+.aa-form-row input[type="tel"],
+.aa-form-row input[type="number"],
+.aa-form-row input[type="date"],
+.aa-form-row select,
+.aa-form-row textarea {
+	width: 100%;
+	padding: 12px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	font-size: 16px;
+	transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.aa-form-row input:focus,
+.aa-form-row select:focus,
+.aa-form-row textarea:focus {
+	border-color: #2271b1;
+	outline: none;
+	box-shadow: 0 0 0 2px rgba(34,113,177,0.15);
+}
+
+.aa-form-row textarea {
+	min-height: 100px;
+	resize: vertical;
+}
+
+.aa-field-help {
+	font-size: 0.9em;
+	color: #666;
+	margin: 4px 0 0;
+}
+
+.aa-form-actions {
+	margin-top: 10px;
+}
+
+.aa-form-actions .aa-button {
+	width: 100%;
+	padding: 14px 24px;
+	font-size: 16px;
+}
+
+.aa-form-link {
+	text-align: center;
+	margin-top: 15px;
+}
+
+.aa-form-link a {
+	color: #2271b1;
+}
+
+/* Radio and Checkbox */
+.aa-radio-group,
+.aa-checkbox-group {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.aa-radio-label,
+.aa-checkbox-label {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+}
+
+.aa-radio-label input,
+.aa-checkbox-label input {
+	width: auto;
+}
+
+/* Donation Options */
+.aa-donation-row {
+	margin-top: 10px;
+	padding-top: 20px;
+	border-top: 1px solid #e0e0e0;
+}
+
+.aa-donation-options {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	align-items: center;
+}
+
+.aa-donation-btn {
+	padding: 10px 20px;
+	border: 1px solid #ddd;
+	background: #fff;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: all 0.2s;
+}
+
+.aa-donation-btn:hover {
+	border-color: #2271b1;
+}
+
+.aa-donation-btn.active {
+	background: #2271b1;
+	color: #fff;
+	border-color: #2271b1;
+}
+
+.aa-donation-options input[type="number"] {
+	width: 120px;
+	padding: 10px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+}
+
+/* Checkout Summary */
+.aa-checkout-summary {
+	background: #f8f9fa;
+	border-radius: 6px;
+	padding: 20px;
+	margin-top: 20px;
+}
+
+.aa-summary-row {
+	display: flex;
+	justify-content: space-between;
+	padding: 8px 0;
+}
+
+.aa-summary-row.aa-total {
+	border-top: 2px solid #333;
+	margin-top: 10px;
+	padding-top: 15px;
+	font-weight: 600;
+	font-size: 1.1em;
+}
+
+.aa-checkout-note {
+	text-align: center;
+	color: #666;
+	font-size: 0.9em;
+	margin-top: 15px;
+}
+
+/* Error Messages */
+.aa-error {
+	background: #fef2f2;
+	border: 1px solid #fecaca;
+	color: #b91c1c;
+	padding: 15px 20px;
+	border-radius: 6px;
+	margin-bottom: 20px;
+}
+
+/* Existing/New Account */
+.aa-existing-account,
+.aa-new-account {
+	animation: fadeIn 0.3s ease;
+}
+
+.aa-existing-account h3,
+.aa-new-account h3 {
+	margin: 0 0 10px;
+	font-size: 1.3em;
+}
+
+.aa-existing-account > p,
+.aa-new-account > p {
+	color: #666;
+	margin-bottom: 20px;
+}
+
+/* Responsive Checkout */
+@media (max-width: 640px) {
+	.aa-checkout-flow {
+		padding: 15px;
+	}
+
+	.aa-checkout-card {
+		padding: 20px;
+	}
+
+	.aa-donation-options {
+		flex-direction: column;
+	}
+
+	.aa-donation-btn {
+		width: 100%;
+		text-align: center;
+	}
+
+	.aa-donation-options input[type="number"] {
+		width: 100%;
+	}
+}

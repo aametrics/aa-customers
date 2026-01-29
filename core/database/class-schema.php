@@ -267,6 +267,49 @@ class AA_Customers_Database {
 			KEY idx_tag (zap_tag)
 		) $charset_collate;";
 
+		// Forms table (data collection forms).
+		$table_forms = $wpdb->prefix . 'forms';
+		$sql_forms   = "CREATE TABLE $table_forms (
+			id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+			name VARCHAR(255) NOT NULL,
+			slug VARCHAR(100) NOT NULL,
+			description TEXT NULL,
+			product_id BIGINT UNSIGNED NULL,
+			form_type ENUM('membership', 'event', 'general') DEFAULT 'general',
+			status ENUM('active', 'draft') DEFAULT 'draft',
+			version INT UNSIGNED DEFAULT 1,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+			PRIMARY KEY (id),
+			UNIQUE KEY uk_slug (slug),
+			KEY idx_product (product_id),
+			KEY idx_type (form_type),
+			KEY idx_status (status)
+		) $charset_collate;";
+
+		// Form fields table.
+		$table_form_fields = $wpdb->prefix . 'form_fields';
+		$sql_form_fields   = "CREATE TABLE $table_form_fields (
+			id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+			form_id BIGINT UNSIGNED NOT NULL,
+			field_order INT UNSIGNED DEFAULT 0,
+			target_table VARCHAR(50) DEFAULT 'members',
+			target_column VARCHAR(100) NOT NULL,
+			label VARCHAR(255) NOT NULL,
+			display_type ENUM('text', 'textarea', 'dropdown', 'radio', 'checkbox', 'date', 'email', 'tel', 'number') DEFAULT 'text',
+			placeholder VARCHAR(255) NULL,
+			help_text TEXT NULL,
+			required BOOLEAN DEFAULT FALSE,
+			options_json TEXT NULL,
+			validation_rules TEXT NULL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+			PRIMARY KEY (id),
+			KEY idx_form (form_id),
+			KEY idx_order (form_id, field_order)
+		) $charset_collate;";
+
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
 		dbDelta( $sql_members );
@@ -276,6 +319,8 @@ class AA_Customers_Database {
 		dbDelta( $sql_registrations );
 		dbDelta( $sql_options );
 		dbDelta( $sql_zap );
+		dbDelta( $sql_forms );
+		dbDelta( $sql_form_fields );
 
 		error_log( 'AA Customers: Database tables created.' );
 	}
@@ -348,5 +393,25 @@ class AA_Customers_Database {
 	public static function get_zap_table_name() {
 		$wpdb = AA_Customers_DB_Connection::get_connection();
 		return $wpdb->prefix . 'zap';
+	}
+
+	/**
+	 * Get forms table name
+	 *
+	 * @return string Table name.
+	 */
+	public static function get_forms_table_name() {
+		$wpdb = AA_Customers_DB_Connection::get_connection();
+		return $wpdb->prefix . 'forms';
+	}
+
+	/**
+	 * Get form fields table name
+	 *
+	 * @return string Table name.
+	 */
+	public static function get_form_fields_table_name() {
+		$wpdb = AA_Customers_DB_Connection::get_connection();
+		return $wpdb->prefix . 'form_fields';
 	}
 }
